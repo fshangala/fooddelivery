@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Header />
-        <main>
+        <main className="max-w-7xl mx-auto min-h-screen">
           {children}
         </main>
         <Footer />
