@@ -46,5 +46,5 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         return errorData;
     }
 
-    redirect('/');
+    redirect('/login');
 }
