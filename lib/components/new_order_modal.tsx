@@ -12,7 +12,12 @@ export default function NewOrderModal() {
             {isOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsOpen(false)}>
                     <div className="bg-white rounded-md p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-                        <h2 className="text-xl font-semibold mb-4">New Order</h2>
+                        <h2 className="text-xl font-semibold mb-4 flex items-center justify-between">
+                            <span>New Order</span>
+                            <button className="text-lg text-red-500 hover:text-red-700 cursor-pointer" onClick={() => setIsOpen(false)}>
+                                X
+                            </button>
+                        </h2>
                         <OrderForm />
                     </div>
                 </div>
