@@ -44,3 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     </AuthContext.Provider>
   );
 }
+
+export function useProtectedRoute() {
+    const session = useAuth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+    return session;
+}

@@ -9,7 +9,7 @@ export default function LandingLayout({
   return (
     <>
     <Header />
-    <main className="max-w-7xl mx-auto min-h-screen">
+    <main className="max-w-7xl mx-auto min-h-screen py-8">
     {children}
     </main>
     <Footer />
