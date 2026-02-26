@@ -23,7 +23,6 @@ export default function Header() {
           <nav id="main-nav" className="hidden absolute top-12 right-0 flex flex-col items-center justify-center gap-2 bg-white shadow-lg rounded-md p-2">
             {session ? (
               <>
-              <a href="/orders" className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition cursor-pointer whitespace-nowrap w-full text-center">Orders</a>
               <a href="/admin" className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition cursor-pointer whitespace-nowrap w-full text-center">Admin</a>
               <a href="/account" className="px-4 py-2 rounded-md bg-primary-500 text-white hover:bg-primary-700 transition cursor-pointer whitespace-nowrap w-full text-center">My Account</a>
               </>
