@@ -32,5 +32,13 @@ export async function loginUser(formState: LoginFormState, formData: FormData) {
         return errorData;
     }
 
+    if (data.user.user_metadata?.role === 'admin') {
+        redirect('/admin');
+    }
+
+    if (data.user.user_metadata?.role === 'customer') {
+        redirect('/account');
+    }
+
     redirect('/');
 }

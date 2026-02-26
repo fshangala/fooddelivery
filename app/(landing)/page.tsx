@@ -1,7 +1,10 @@
+import LandingPageComponent from "./landing_page_component";
 
 
 export default function Home() {
   return (
-    <div></div>
+    <div>
+      <LandingPageComponent />
+    </div>
   );
 }
