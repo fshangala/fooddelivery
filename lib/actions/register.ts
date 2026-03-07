@@ -19,6 +19,8 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         errorData.errors = { ...errorData.errors, name: "Name is required" };
     }
 
+    const role = formData.get('role') as string || "customer";
+
     const email = formData.get('email') as string;
     if (!email) {
         errorData.errors = { ...errorData.errors, email: "Email is required" };
@@ -39,12 +41,12 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         return errorData;
     }
 
-    const { data, error } = await supabase.auth.signUp({email, password, options: { data: { name, }, }, });
+    const { data, error } = await supabase.auth.signUp({email, password, options: { data: { name, role }, }, });
 
     if (error) {
         errorData.message = error.message;
         return errorData;
     }
 
-    redirect('/login');
+    redirect('/');
 }

@@ -36,9 +36,5 @@ export async function loginUser(formState: LoginFormState, formData: FormData) {
         redirect('/admin');
     }
 
-    if (data.user.user_metadata?.role === 'customer') {
-        redirect('/account');
-    }
-
     redirect('/');
 }
