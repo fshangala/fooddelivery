@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FoodDelivery",
-  description: "A food delivery app",
+  title: "PremiumFresh",
+  description: "Fresh vegetable subscription and delivery service",
 };
 
 export default function RootLayout({

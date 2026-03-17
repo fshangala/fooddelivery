@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function CustomerPageComponent() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-primary-50 to-secondary-50 px-4">
@@ -8,9 +10,9 @@ export default function CustomerPageComponent() {
                 <p className="text-xl text-gray-700 mb-8">Fresh vegetables delivered right to your doorstep</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <button className="px-6 py-4 bg-linear-to-r from-primary-500 to-primary-600 text-white font-bold rounded-lg hover:shadow-lg transition transform hover:scale-105">
-                        Browse Produce
-                    </button>
+                    <Link href="/order/new" className="px-6 py-4 bg-linear-to-r from-primary-500 to-primary-600 text-white font-bold rounded-lg hover:shadow-lg transition transform hover:scale-105 text-center">
+                        Create New Order
+                    </Link>
                     <button className="px-6 py-4 bg-linear-to-r from-secondary-500 to-secondary-600 text-white font-bold rounded-lg hover:shadow-lg transition transform hover:scale-105">
                         View Orders
                     </button>

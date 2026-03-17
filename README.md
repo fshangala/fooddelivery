@@ -66,7 +66,6 @@ lib/          # reusable utilities and components
   components/     # UI components (headers, forms, modals, etc.)
   definitions/    # type definitions
   supabase/       # client setup
-session.ts    # session helper
 ```
 
 ---

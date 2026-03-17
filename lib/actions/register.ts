@@ -1,16 +1,36 @@
 import supabase from "@/lib/supabase/client";
 import { redirect } from "next/navigation";
 
+/**
+ * State object representing the validation and operation results of the registration form.
+ */
 type RegisterFormState = {
+    /** Field-specific validation errors. */
     errors?: {
+        /** Error message for the name field. */
         name?: string;
+        /** Error message for the email field. */
         email?: string;
+        /** Error message for the password field. */
         password?: string;
+        /** Error message for the confirm password field. */
         confirmPassword?: string;
     };
+    /** A general status or error message. */
     message?: string;
 };
 
+/**
+ * Server Action to register a new user with Supabase Auth.
+ * 
+ * Validates 'name', 'email', 'password', and 'confirmPassword'.
+ * On success, signs up the user with user_metadata containing their name and role.
+ * 
+ * @param formState - The current state of the registration form.
+ * @param formData - The form data containing registration fields.
+ * @returns A promise that resolves to the updated RegisterFormState on validation error or failure.
+ *          Redirects to '/' upon successful registration.
+ */
 export async function registerUser(formState: RegisterFormState | undefined, formData: FormData) {
     const errorData: RegisterFormState = {};
 
