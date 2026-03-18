@@ -1,8 +1,10 @@
 import NewOrderModal from "@/lib/components/new_order_modal";
 import { OrderService } from "@/lib/services/order_service";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminOrdersPage() {
-    const orders = await OrderService.getAll();
+    const supabase = await createClient();
+    const orders = await OrderService.getAll(supabase);
 
     return (
         <div>

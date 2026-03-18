@@ -1,5 +1,7 @@
+'use server';
+
 import { redirect } from "next/navigation";
-import supabase from "../supabase/client";
+import { createClient } from "../supabase/server";
 
 /**
  * Server Action to sign out the current user.
@@ -8,6 +10,7 @@ import supabase from "../supabase/client";
  * Logs any errors encountered during the sign-out process.
  */
 export default async function logout() {
+    const supabase = await createClient();
     const { error } = await supabase.auth.signOut({ scope: 'local' });
 
     if (error) {

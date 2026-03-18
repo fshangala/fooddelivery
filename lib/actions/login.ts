@@ -1,5 +1,7 @@
+'use server';
+
 import { redirect } from "next/navigation";
-import supabase from "../supabase/client";
+import { createClient } from "../supabase/server";
 
 /**
  * State object representing the validation and operation results of the login form.
@@ -40,6 +42,7 @@ export async function loginUser(formState: LoginFormState, formData: FormData) {
         return errorData;
     }
 
+    const supabase = await createClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {

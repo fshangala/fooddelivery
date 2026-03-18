@@ -21,7 +21,7 @@
 -   **Framework**: Next.js 13+ (App Router)
 -   **Language**: TypeScript
 -   **Styling**: Tailwind CSS (via global styles and utility classes)
--   **Database & Auth**: Supabase
+-   **Database & Auth**: Supabase with `@supabase/ssr` for robust session handling.
 -   **Deployment**: Vercel-ready
 
 ## Key Directories
@@ -29,21 +29,27 @@
 -   `app/(admin)`: Protected admin routes.
 -   `lib/actions`: Server actions for form handling (Login, Register, Order Creation).
 -   `lib/components`: Reusable UI components (Forms, Modals, Headers).
--   `lib/supabase`: Supabase client configuration.
+-   `lib/definitions`: Shared types and constants (e.g., `AVAILABLE_VEGETABLES`).
+-   `lib/supabase`: Supabase client configurations for client, server, and middleware.
 
 ## User Roles & Authentication
 - **User Metadata**: Each Supabase user has a `role` field within their `user_metadata`. This defines their access level:
   - `admin`: Full access to the admin dashboard and order monitoring.
   - `customer`: Access to personal dashboard and weekly vegetable selection.
   - `driver`: Access to the delivery queue and navigation tools.
-- **Authentication**: Built-in register and login flows use these roles to redirect users to their respective interfaces.
+- **Authentication**: Uses `@supabase/ssr`. A root `middleware.ts` handles session refreshing.
+- **Client Usage**:
+  - `lib/supabase/client.ts`: Exports `createClient` for Client Components.
+  - `lib/supabase/server.ts`: Exports `createClient` for Server Components/Actions (requires `await`).
 
 ## Development Guidelines
--   **Server Actions**: Use `use server` for all form submissions and data mutations.
--   **Client Components**: Use `use client` for interactive UI elements (forms, modals).
--   **Authentication**: Use `useAuth` hook for client-side session access; verify sessions server-side for protected actions.
+-   **Server Actions**: Use `use server` for all form submissions and data mutations. Always initialize a server-side Supabase client within the action.
+-   **Client Components**: Use `use client` for interactive UI elements.
+-   **Authentication**: Use `useAuth` hook for client-side session access; use the server client to verify sessions for protected actions/components.
+-   **Service Pattern**: `OrderService` methods require a `SupabaseClient` instance to be passed as the first argument to ensure the correct context (client vs server) is used.
 -   **Styling**: Prioritize Tailwind CSS utility classes for consistent design.
 
 ## Current State
--   **Vegetable Selection**: Implemented in `/order/new` with multi-select checkboxes.
+-   **Vegetable Selection**: Implemented in `/order/new` using the `AVAILABLE_VEGETABLES` constant from `lib/definitions/order.ts`.
 -   **Order Storage**: Orders are stored in the `orders` table with a JSON `vegetables` column and `address` field.
+-   **SSR Integration**: Full integration with `@supabase/ssr` completed for secure, cookie-based session management across the App Router.

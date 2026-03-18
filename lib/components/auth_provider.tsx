@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from "react";
-import supabase from "../supabase/client";
+import { createClient } from "../supabase/client";
 import { Session } from "@supabase/supabase-js";
 
 const AuthContext = createContext<Session | null>(null);
@@ -9,6 +9,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [currentSession, setCurrentSession] = useState<Session | null>(null);
+    const supabase = createClient();
 
     useEffect(() => {
         const { data } = supabase.auth.onAuthStateChange((event, session) => {

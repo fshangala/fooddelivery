@@ -1,10 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OrderService } from '@/lib/services/order_service';
-import supabase from '@/lib/supabase/client';
 
 describe('OrderService', () => {
+    const mockSupabase = {
+        from: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+    } as any;
+
     beforeEach(() => {
         vi.clearAllMocks();
+        // Reset the mock implementations to return 'this' for chaining
+        mockSupabase.from.mockReturnValue(mockSupabase);
+        mockSupabase.insert.mockReturnValue(mockSupabase);
+        mockSupabase.select.mockReturnValue(mockSupabase);
+        mockSupabase.single.mockReturnValue(mockSupabase);
+        mockSupabase.order.mockReturnValue(mockSupabase);
+        mockSupabase.eq.mockReturnValue(mockSupabase);
+        mockSupabase.update.mockReturnValue(mockSupabase);
+        mockSupabase.neq.mockReturnValue(mockSupabase);
     });
 
     describe('create', () => {
@@ -20,29 +39,21 @@ describe('OrderService', () => {
 
             const mockResponse = { id: '123', created_at: '2024-01-01', ...mockOrder };
 
-            const singleMock = vi.fn().mockResolvedValue({ data: mockResponse, error: null });
-            const selectMock = vi.fn().mockReturnValue({ single: singleMock });
-            const insertMock = vi.fn().mockReturnValue({ select: selectMock });
+            mockSupabase.single.mockResolvedValue({ data: mockResponse, error: null });
             
-            vi.mocked(supabase.from).mockReturnValue({ insert: insertMock } as any);
-
-            const result = await OrderService.create(mockOrder);
+            const result = await OrderService.create(mockSupabase, mockOrder);
 
             expect(result).toEqual(mockResponse);
-            expect(supabase.from).toHaveBeenCalledWith('orders');
-            expect(insertMock).toHaveBeenCalledWith([mockOrder]);
+            expect(mockSupabase.from).toHaveBeenCalledWith('orders');
+            expect(mockSupabase.insert).toHaveBeenCalledWith([mockOrder]);
         });
 
         it('should return null on error during creation', async () => {
             const mockOrder = { customer_id: 'Fail' } as any;
 
-            const singleMock = vi.fn().mockResolvedValue({ data: null, error: { message: 'DB Error' } });
-            const selectMock = vi.fn().mockReturnValue({ single: singleMock });
-            const insertMock = vi.fn().mockReturnValue({ select: selectMock });
+            mockSupabase.single.mockResolvedValue({ data: null, error: { message: 'DB Error' } });
             
-            vi.mocked(supabase.from).mockReturnValue({ insert: insertMock } as any);
-
-            const result = await OrderService.create(mockOrder);
+            const result = await OrderService.create(mockSupabase, mockOrder);
 
             expect(result).toBeNull();
         });
@@ -51,47 +62,77 @@ describe('OrderService', () => {
     describe('getAll', () => {
         it('should fetch all orders', async () => {
             const mockOrders = [{ id: '1', customer_id: 'u1' }, { id: '2', customer_id: 'u2' }];
-            const orderMock = vi.fn().mockResolvedValue({ data: mockOrders, error: null });
-            const selectMock = vi.fn().mockReturnValue({ order: orderMock });
+            mockSupabase.order.mockResolvedValue({ data: mockOrders, error: null });
             
-            vi.mocked(supabase.from).mockReturnValue({ select: selectMock } as any);
-
-            const result = await OrderService.getAll();
+            const result = await OrderService.getAll(mockSupabase);
 
             expect(result).toEqual(mockOrders);
-            expect(selectMock).toHaveBeenCalledWith('*');
-            expect(orderMock).toHaveBeenCalledWith('created_at', { ascending: false });
+            expect(mockSupabase.from).toHaveBeenCalledWith('orders');
+            expect(mockSupabase.select).toHaveBeenCalledWith('*');
+            expect(mockSupabase.order).toHaveBeenCalledWith('created_at', { ascending: false });
         });
     });
 
     describe('getByCustomerId', () => {
         it('should fetch orders for a specific customer', async () => {
             const mockOrders = [{ id: '1', customer_id: 'user-123' }];
-            const orderMock = vi.fn().mockResolvedValue({ data: mockOrders, error: null });
-            const eqMock = vi.fn().mockReturnValue({ order: orderMock });
-            const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
+            mockSupabase.order.mockResolvedValue({ data: mockOrders, error: null });
             
-            vi.mocked(supabase.from).mockReturnValue({ select: selectMock } as any);
-
-            const result = await OrderService.getByCustomerId('user-123');
+            const result = await OrderService.getByCustomerId(mockSupabase, 'user-123');
 
             expect(result).toEqual(mockOrders);
-            expect(eqMock).toHaveBeenCalledWith('customer_id', 'user-123');
+            expect(mockSupabase.eq).toHaveBeenCalledWith('customer_id', 'user-123');
         });
     });
 
     describe('updateStatus', () => {
         it('should successfully update status', async () => {
-            const eqMock = vi.fn().mockResolvedValue({ error: null });
-            const updateMock = vi.fn().mockReturnValue({ eq: eqMock });
+            mockSupabase.eq.mockResolvedValue({ error: null });
             
-            vi.mocked(supabase.from).mockReturnValue({ update: updateMock } as any);
-
-            const result = await OrderService.updateStatus('123', 'DELIVERED');
+            const result = await OrderService.updateStatus(mockSupabase, '123', 'DELIVERED');
 
             expect(result).toBe(true);
-            expect(updateMock).toHaveBeenCalledWith({ status: 'DELIVERED' });
-            expect(eqMock).toHaveBeenCalledWith('id', '123');
+            expect(mockSupabase.update).toHaveBeenCalledWith({ status: 'DELIVERED' });
+            expect(mockSupabase.eq).toHaveBeenCalledWith('id', '123');
+        });
+    });
+
+    describe('assignDriver', () => {
+        it('should successfully assign a driver', async () => {
+            mockSupabase.eq.mockResolvedValue({ error: null });
+            
+            const result = await OrderService.assignDriver(mockSupabase, 'order-123', 'driver-456');
+
+            expect(result).toBe(true);
+            expect(mockSupabase.update).toHaveBeenCalledWith({ driver_id: 'driver-456', status: 'IN_PROGRESS' });
+            expect(mockSupabase.eq).toHaveBeenCalledWith('id', 'order-123');
+        });
+    });
+
+    describe('getPendingOrders', () => {
+        it('should fetch all pending orders', async () => {
+            const mockOrders = [{ id: '1', status: 'PENDING' }];
+            mockSupabase.order.mockResolvedValue({ data: mockOrders, error: null });
+            
+            const result = await OrderService.getPendingOrders(mockSupabase);
+
+            expect(result).toEqual(mockOrders);
+            expect(mockSupabase.eq).toHaveBeenCalledWith('status', 'PENDING');
+            expect(mockSupabase.order).toHaveBeenCalledWith('created_at', { ascending: true });
+        });
+    });
+
+    describe('getDriverOrders', () => {
+        it('should fetch active orders for a driver', async () => {
+            const mockOrders = [{ id: '1', driver_id: 'driver-123', status: 'IN_PROGRESS' }];
+            mockSupabase.order.mockResolvedValue({ data: mockOrders, error: null });
+            
+            const result = await OrderService.getDriverOrders(mockSupabase, 'driver-123');
+
+            expect(result).toEqual(mockOrders);
+            expect(mockSupabase.eq).toHaveBeenCalledWith('driver_id', 'driver-123');
+            expect(mockSupabase.neq).toHaveBeenCalledWith('status', 'DELIVERED');
+            expect(mockSupabase.neq).toHaveBeenCalledWith('status', 'CANCELLED');
         });
     });
 });

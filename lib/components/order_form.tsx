@@ -2,7 +2,8 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { createOrder, AVAILABLE_VEGETABLES } from "@/lib/actions/order";
+import { createOrder } from "@/lib/actions/order";
+import { AVAILABLE_VEGETABLES } from "@/lib/definitions/order";
 
 interface OrderFormProps {
     initialData?: {

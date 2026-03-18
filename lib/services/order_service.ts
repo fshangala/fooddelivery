@@ -1,4 +1,4 @@
-import supabase from "../supabase/client";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { Order, OrderStatus } from "../definitions";
 
 /**
@@ -9,6 +9,7 @@ export class OrderService {
     /**
      * Creates a new vegetable order in the database.
      * 
+     * @param supabase - The Supabase client to use for the operation.
      * @param orderData - The order details excluding system-generated fields (id, created_at).
      * @param orderData.customer_id - The UUID of the customer from auth.users.
      * @param orderData.address - The physical delivery address.
@@ -18,7 +19,7 @@ export class OrderService {
      * @param orderData.status - Initial status of the order (usually 'PENDING').
      * @returns The newly created order object, or null if the operation fails.
      */
-    static async create(orderData: Omit<Order, 'id' | 'created_at'>): Promise<Order | null> {
+    static async create(supabase: SupabaseClient, orderData: Omit<Order, 'id' | 'created_at'>): Promise<Order | null> {
         const { data, error } = await supabase
             .from('orders')
             .insert([{
@@ -41,9 +42,10 @@ export class OrderService {
      * Retrieves all orders from the database.
      * Orders are returned in descending order based on their creation date (newest first).
      * 
+     * @param supabase - The Supabase client to use for the operation.
      * @returns A promise that resolves to an array of Order objects. Returns an empty array on error.
      */
-    static async getAll(): Promise<Order[]> {
+    static async getAll(supabase: SupabaseClient): Promise<Order[]> {
         const { data, error } = await supabase
             .from('orders')
             .select('*')
@@ -60,10 +62,11 @@ export class OrderService {
     /**
      * Retrieves a specific order by its unique identifier.
      * 
+     * @param supabase - The Supabase client to use for the operation.
      * @param id - The UUID of the order to retrieve.
      * @returns A promise that resolves to the Order object if found, or null if not found or an error occurs.
      */
-    static async getById(id: string): Promise<Order | null> {
+    static async getById(supabase: SupabaseClient, id: string): Promise<Order | null> {
         const { data, error } = await supabase
             .from('orders')
             .select('*')
@@ -82,10 +85,11 @@ export class OrderService {
      * Retrieves all orders associated with a specific customer.
      * Orders are returned in descending order based on their creation date (newest first).
      * 
+     * @param supabase - The Supabase client to use for the operation.
      * @param customerId - The UUID of the customer whose orders are being retrieved.
      * @returns A promise that resolves to an array of Order objects. Returns an empty array on error.
      */
-    static async getByCustomerId(customerId: string): Promise<Order[]> {
+    static async getByCustomerId(supabase: SupabaseClient, customerId: string): Promise<Order[]> {
         const { data, error } = await supabase
             .from('orders')
             .select('*')
@@ -103,11 +107,12 @@ export class OrderService {
     /**
      * Updates the status of an existing order.
      * 
+     * @param supabase - The Supabase client to use for the operation.
      * @param id - The UUID of the order to update.
      * @param status - The new status to apply to the order.
      * @returns A promise that resolves to true if the update was successful, or false if it failed.
      */
-    static async updateStatus(id: string, status: OrderStatus): Promise<boolean> {
+    static async updateStatus(supabase: SupabaseClient, id: string, status: OrderStatus): Promise<boolean> {
         const { error } = await supabase
             .from('orders')
             .update({ status })
@@ -119,5 +124,72 @@ export class OrderService {
         }
 
         return true;
+    }
+
+    /**
+     * Assigns a driver to an order and updates the status to 'IN_PROGRESS'.
+     * 
+     * @param supabase - The Supabase client to use for the operation.
+     * @param id - The UUID of the order to update.
+     * @param driverId - The UUID of the driver to assign.
+     * @returns A promise that resolves to true if the update was successful, or false if it failed.
+     */
+    static async assignDriver(supabase: SupabaseClient, id: string, driverId: string): Promise<boolean> {
+        const { error } = await supabase
+            .from('orders')
+            .update({ driver_id: driverId, status: 'IN_PROGRESS' })
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error assigning driver:", error.message);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Retrieves all orders with 'PENDING' status.
+     * 
+     * @param supabase - The Supabase client to use for the operation.
+     * @returns A promise that resolves to an array of pending Order objects. Returns an empty array on error.
+     */
+    static async getPendingOrders(supabase: SupabaseClient): Promise<Order[]> {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('status', 'PENDING')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error("Error fetching pending orders:", error.message);
+            return [];
+        }
+
+        return (data || []) as Order[];
+    }
+
+    /**
+     * Retrieves all active orders assigned to a specific driver.
+     * 
+     * @param supabase - The Supabase client to use for the operation.
+     * @param driverId - The UUID of the driver.
+     * @returns A promise that resolves to an array of Order objects. Returns an empty array on error.
+     */
+    static async getDriverOrders(supabase: SupabaseClient, driverId: string): Promise<Order[]> {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('driver_id', driverId)
+            .neq('status', 'DELIVERED')
+            .neq('status', 'CANCELLED')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error("Error fetching driver orders:", error.message);
+            return [];
+        }
+
+        return (data || []) as Order[];
     }
 }

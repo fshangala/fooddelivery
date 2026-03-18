@@ -11,17 +11,17 @@
   - Accept deliveries one after the other.
   - Each assigned delivery includes a **Navigate** button that opens Google Maps to guide the driver to the drop‑off location.
 - **Admin Area**: Administrators can view orders and monitor activity through a secure section of the app.
-- **Authentication**: Built-in register, login, and session management using Supabase.
+- **Authentication**: Built-in register, login, and session management using Supabase with `@supabase/ssr`.
 - **Responsive UI**: Components such as headers, forms, modals, and order lists are included in the `lib/components` directory.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 13+](https://nextjs.org)
+- **Framework**: [Next.js 13+](https://nextjs.org) (App Router)
 - **Language**: TypeScript
-- **Styling**: CSS Modules / global styles
-- **Auth & Database**: [Supabase](https://supabase.com)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com)
+- **Auth & Database**: [Supabase](https://supabase.com) with `@supabase/ssr`
 - **Deployment**: Optimized for [Vercel](https://vercel.com)
 
 ---
@@ -42,7 +42,7 @@ Create a `.env.local` file with Supabase keys and any other required configurati
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=...
 ```
 
 )
@@ -62,10 +62,12 @@ Open [http://localhost:3000](http://localhost:3000) to explore the application.
 ```
 app/          # Next.js app routes and layouts
 lib/          # reusable utilities and components
-  actions/        # login, logout, register helpers
+  actions/        # Server actions (login, logout, register, order)
   components/     # UI components (headers, forms, modals, etc.)
-  definitions/    # type definitions
-  supabase/       # client setup
+  definitions/    # Type definitions and shared constants
+  services/       # Business logic and database interactions
+  supabase/       # Supabase client setup (client, server, middleware)
+middleware.ts # Next.js middleware for session management
 ```
 
 ---
@@ -74,6 +76,9 @@ lib/          # reusable utilities and components
 
 - Drivers should click the **Navigate** button on each delivery to open Google Maps directions.
 - Admin and customer interfaces are separated under `(admin)` and `(landing)` route segments.
+- **Supabase Clients**: Always use the appropriate client helper:
+    - Use `createClient()` from `@/lib/supabase/client` in Client Components.
+    - Use `await createClient()` from `@/lib/supabase/server` in Server Components, Server Actions, and Route Handlers.
 
 ---
 

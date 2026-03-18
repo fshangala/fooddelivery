@@ -2,22 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { OrderService } from "../services/order_service";
-import supabase from "../supabase/client";
-
-/**
- * List of available vegetables that can be included in an order.
- */
-export const AVAILABLE_VEGETABLES = [
-    "Spinach",
-    "Carrots",
-    "Potatoes",
-    "Tomatoes",
-    "Onions",
-    "Broccoli",
-    "Peppers",
-    "Lettuce",
-    "Cabbage"
-];
+import { createClient } from "../supabase/server";
 
 /**
  * State object representing the validation and operation results of the order form.
@@ -48,6 +33,7 @@ export type OrderFormState = {
 export async function createOrder(formState: OrderFormState | undefined, formData: FormData) {
     const errorData: OrderFormState = {};
 
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -73,7 +59,7 @@ export async function createOrder(formState: OrderFormState | undefined, formDat
     const lat = -26.2041;
     const lon = 28.0473;
 
-    const result = await OrderService.create({
+    const result = await OrderService.create(supabase, {
         customer_id: user.id,
         address,
         lat,

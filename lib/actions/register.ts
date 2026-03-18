@@ -1,4 +1,6 @@
-import supabase from "@/lib/supabase/client";
+'use server';
+
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 /**
@@ -61,6 +63,7 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         return errorData;
     }
 
+    const supabase = await createClient();
     const { data, error } = await supabase.auth.signUp({email, password, options: { data: { name, role }, }, });
 
     if (error) {
