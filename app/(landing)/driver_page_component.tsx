@@ -27,16 +27,18 @@ export default function DriverPageComponent() {
         setPendingOrders(pending);
         setMyOrders(mine);
         setLoading(false);
-        
+
+        // Update active tab based on fetched data
         if (mine.length > 0) {
             setActiveTab('active');
-        } else {
+        } else if (pending.length > 0) {
             setActiveTab('available');
         }
     }, [userId, supabase]);
 
     useEffect(() => {
         if (userId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             fetchData();
         }
     }, [fetchData, userId]);

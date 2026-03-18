@@ -3,6 +3,7 @@
 import { useAuth } from "./auth_provider";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import logout from "@/lib/actions/logout";
 
 export default function Header() {
   const session = useAuth();
@@ -40,14 +41,15 @@ export default function Header() {
           <nav id="main-nav" className={`${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} absolute top-12 right-0 flex flex-col items-center justify-center gap-2 bg-white shadow-lg rounded-md p-2 transition-opacity`}>
             {session ? (
               <>
-              {session.user.role === "admin" && (
+              {session.user.user_metadata?.role === "admin" && (
               <Link href="/admin" className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition cursor-pointer whitespace-nowrap w-full text-center">Admin</Link>
               )}
 
-              {session.user.role === "courier" && (
-              <Link href="/courier" className="px-4 py-2 rounded-md bg-secondary-500 text-white hover:bg-secondary-700 transition cursor-pointer whitespace-nowrap w-full text-center">Courier Dashboard</Link>
+              {session.user.user_metadata?.role === "driver" && (
+              <Link href="/" className="px-4 py-2 rounded-md bg-secondary-500 text-white hover:bg-secondary-700 transition cursor-pointer whitespace-nowrap w-full text-center">Driver Dashboard</Link>
               )}
-              <Link href="/listings" className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition cursor-pointer whitespace-nowrap w-full text-center">Listings</Link>
+              
+              <button onClick={() => logout()} className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-700 transition cursor-pointer whitespace-nowrap w-full text-center">Logout</button>
               </>
             ) : (
               <Link href="/login" className="px-4 py-2 rounded-md bg-primary-500 text-white hover:bg-primary-700 transition cursor-pointer whitespace-nowrap w-full text-center">Sign In/ Sign Up</Link>
