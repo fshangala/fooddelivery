@@ -176,17 +176,39 @@ export class OrderService {
      * @param driverId - The UUID of the driver.
      * @returns A promise that resolves to an array of Order objects. Returns an empty array on error.
      */
-    static async getDriverOrders(supabase: SupabaseClient, driverId: string): Promise<Order[]> {
+    static async getActiveOrdersByDriver(supabase: SupabaseClient, driverId: string): Promise<Order[]> {
         const { data, error } = await supabase
             .from('orders')
             .select('*')
             .eq('driver_id', driverId)
-            .neq('status', 'DELIVERED')
-            .neq('status', 'CANCELLED')
+            .eq('status', 'IN_PROGRESS')
             .order('created_at', { ascending: true });
 
         if (error) {
             console.error("Error fetching driver orders:", error.message);
+            return [];
+        }
+
+        return (data || []) as Order[];
+    }
+
+    /**
+     * Retrieves all completed orders assigned to a specific driver.
+     * 
+     * @param supabase - The Supabase client to use for the operation.
+     * @param driverId - The UUID of the driver.
+     * @returns A promise that resolves to an array of completed Order objects.
+     */
+    static async getCompletedOrdersByDriver(supabase: SupabaseClient, driverId: string): Promise<Order[]> {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('driver_id', driverId)
+            .eq('status', 'DELIVERED')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Error fetching completed orders:", error.message);
             return [];
         }
 

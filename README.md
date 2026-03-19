@@ -6,10 +6,12 @@
 
 ## 🚀 Key Features
 
-- **Customer Portal**: Users can register, log in, and manage their monthly vegetable subscriptions. Deliveries are scheduled on a weekly basis.
-- **Driver Dashboard**: Drivers have an interface showing a queue of available deliveries.
-  - Accept deliveries one after the other.
-  - Each assigned delivery includes a **Navigate** button that opens Google Maps to guide the driver to the drop‑off location.
+- **Customer Portal**: Users can register (as a Customer or Driver), log in, and manage their monthly vegetable subscriptions. Deliveries are scheduled on a weekly basis.
+- **Driver Dashboard**: A comprehensive, tabbed interface for drivers that includes:
+  - **Profile & Active**: A profile view and a list of all deliveries currently in progress.
+  - **Available**: A real-time queue of all pending orders ready for pickup.
+  - **History**: A record of all completed deliveries.
+  - Each active delivery includes a **Navigate** button that opens Google Maps for routing.
 - **Admin Area**: Administrators can view orders and monitor activity through a secure section of the app.
 - **Authentication**: Built-in register, login, and session management using Supabase with `@supabase/ssr`.
 - **Responsive UI**: Components such as headers, forms, modals, and order lists are included in the `lib/components` directory.

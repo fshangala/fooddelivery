@@ -8,12 +8,15 @@
 
 ## Core Features
 1.  **Customer Portal**:
-    -   **Registration/Login**: Secure authentication via Supabase.
+    -   **Registration/Login**: Secure authentication via Supabase. Users can register for a 'Customer' or 'Driver' role.
     -   **Weekly Selection**: Customers select their weekly vegetables from a curated list at `/order/new`.
     -   **Dashboard**: View active subscriptions and order status.
 2.  **Driver Dashboard**:
-    -   **Delivery Queue**: Drivers view assigned deliveries.
-    -   **Navigation**: "Navigate" button integrates with Google Maps for easy routing.
+    -   **Tabbed Interface**: A multi-tab dashboard for drivers to manage their workflow.
+    -   **Profile & Active Orders**: Shows the driver's profile and a list of all deliveries currently in progress.
+    -   **Available Orders**: A queue of pending orders that can be accepted by any driver.
+    -   **Completed Orders**: A history of the driver's completed deliveries.
+    -   **Navigation**: "Navigate" button integrates with Google Maps for easy routing on active orders.
 3.  **Admin Area**:
     -   **Order Management**: Admins monitor all orders, status, and details under `/admin/orders`.
 
@@ -36,7 +39,7 @@
 - **User Metadata**: Each Supabase user has a `role` field within their `user_metadata`. This defines their access level:
   - `admin`: Full access to the admin dashboard and order monitoring.
   - `customer`: Access to personal dashboard and weekly vegetable selection.
-  - `driver`: Access to the delivery queue and navigation tools.
+  - `driver`: Access to the tabbed driver dashboard to find, accept, and manage deliveries.
 - **Authentication**: Uses `@supabase/ssr`. A root `middleware.ts` handles session refreshing.
 - **Client Usage**:
   - `lib/supabase/client.ts`: Exports `createClient` for Client Components.

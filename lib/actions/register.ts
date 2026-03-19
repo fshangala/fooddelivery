@@ -1,5 +1,6 @@
 'use server';
 
+import { UserRole } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -17,6 +18,8 @@ type RegisterFormState = {
         password?: string;
         /** Error message for the confirm password field. */
         confirmPassword?: string;
+        /** Error message for the role field. */
+        role?: string;
     };
     /** A general status or error message. */
     message?: string;
@@ -41,7 +44,10 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         errorData.errors = { ...errorData.errors, name: "Name is required" };
     }
 
-    const role = formData.get('role') as string || "customer";
+    const role = formData.get('role') as UserRole;
+    if (!role || !['customer', 'driver'].includes(role)) {
+        errorData.errors = { ...errorData.errors, role: "Invalid account type selected" };
+    }
 
     const email = formData.get('email') as string;
     if (!email) {
@@ -59,7 +65,7 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         errorData.errors = { ...errorData.errors, confirmPassword: "Passwords do not match" };
     }
 
-    if (errorData.errors || errorData.message) {
+    if (errorData.errors && Object.keys(errorData.errors).length > 0) {
         return errorData;
     }
 

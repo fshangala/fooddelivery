@@ -1,3 +1,5 @@
+export type UserRole = 'customer' | 'driver' | 'admin';
+
 export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'DELIVERED' | 'CANCELLED';
 
 /**
