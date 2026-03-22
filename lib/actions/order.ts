@@ -14,6 +14,9 @@ export type OrderFormState = {
         address?: string;
         /** Error message for the vegetables selection. */
         vegetables?: string;
+        /** Error message for latitude/longitude. */
+        lat?: string;
+        lon?: string;
     };
     /** A general status or error message. */
     message?: string;
@@ -43,7 +46,7 @@ export async function createOrder(formState: OrderFormState | undefined, formDat
 
     const address = formData.get('address') as string;
     if (!address) {
-        errorData.errors = { ...errorData.errors, address: "Address is required" };
+        errorData.errors = { ...errorData.errors, address: "Address is required. Please select a location on the map." };
     }
 
     const vegetables = formData.getAll('vegetables') as string[];
@@ -51,13 +54,24 @@ export async function createOrder(formState: OrderFormState | undefined, formDat
         errorData.errors = { ...errorData.errors, vegetables: "Select at least one vegetable" };
     }
 
-    if (errorData.errors) {
+    const latStr = formData.get('lat') as string;
+    const lonStr = formData.get('lon') as string;
+    
+    if (!latStr || !lonStr) {
+        errorData.errors = { ...errorData.errors, lat: "Location is required. Please pick a location on the map." };
         return errorData;
     }
 
-    // Mocking lat/lon for now since we don't have a map picker yet
-    const lat = -26.2041;
-    const lon = 28.0473;
+    const lat = parseFloat(latStr);
+    const lon = parseFloat(lonStr);
+
+    if (isNaN(lat) || isNaN(lon)) {
+        errorData.errors = { ...errorData.errors, lat: "Invalid location data." };
+    }
+
+    if (errorData.errors && Object.keys(errorData.errors).length > 0) {
+        return errorData;
+    }
 
     const result = await OrderService.create(supabase, {
         customer_id: user.id,

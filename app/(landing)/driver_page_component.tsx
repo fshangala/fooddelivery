@@ -44,9 +44,12 @@ export default function DriverPageComponent() {
     }, [userId, supabase]);
 
     useEffect(() => {
-        if (userId) {
-            fetchData();
-        }
+        const load = async () => {
+            if (userId) {
+                await fetchData();
+            }
+        };
+        load();
     }, [fetchData, userId]);
 
     const handleAcceptOrder = async (orderId: string) => {

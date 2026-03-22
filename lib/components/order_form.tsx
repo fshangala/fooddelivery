@@ -4,13 +4,8 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { createOrder } from "@/lib/actions/order";
 import { AVAILABLE_VEGETABLES } from "@/lib/definitions/order";
-
-interface OrderFormProps {
-    initialData?: {
-        name?: string;
-        email?: string;
-    };
-}
+import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -35,8 +30,22 @@ function SubmitButton() {
     );
 }
 
-export default function OrderForm({ initialData }: OrderFormProps) {
+export default function OrderForm() {
     const [state, action] = useActionState(createOrder, undefined);
+    const [address, setAddress] = useState('');
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
+
+    const Map = useMemo(() => dynamic(() => import('@/lib/components/location_picker'), {
+        loading: () => <p>A map is loading...</p>,
+        ssr: false
+    }), []);
+
+    const handleLocationChange = (lat: number, lng: number, addr: string) => {
+        setLatitude(lat);
+        setLongitude(lng);
+        setAddress(addr);
+    };
 
     return (
         <form action={action} className="space-y-6">
@@ -47,14 +56,21 @@ export default function OrderForm({ initialData }: OrderFormProps) {
             )}
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Address</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Select Delivery Location</label>
+                <Map onLocationChange={handleLocationChange} />
+                <input type="hidden" name="lat" value={latitude ?? ''} />
+                <input type="hidden" name="lon" value={longitude ?? ''} />
+                
                 <textarea
                     name="address"
-                    rows={3}
-                    className={`block w-full rounded-lg border shadow-sm p-2.5 transition-colors focus:ring-2 focus:ring-primary-500 focus:border-transparent ${state?.errors?.address ? 'border-red-300' : 'border-gray-300'}`}
-                    placeholder="Enter your full street address"
+                    rows={2}
+                    className={`mt-2 block w-full rounded-lg border shadow-sm p-2.5 bg-gray-100 transition-colors focus:ring-2 focus:ring-primary-500 focus:border-transparent ${state?.errors?.address ? 'border-red-300' : 'border-gray-300'}`}
+                    placeholder="Your address will appear here after selecting a location on the map..."
+                    value={address}
+                    readOnly
                 ></textarea>
                 {state?.errors?.address && <p className="mt-1 text-sm text-red-600">{state.errors.address}</p>}
+                 {state?.errors?.lat && <p className="mt-1 text-sm text-red-600">{state.errors.lat}</p>}
             </div>
 
             <div>

@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OrderService } from '@/lib/services/order_service';
+import { Order } from '@/lib/definitions';
 
 describe('OrderService', () => {
-    const mockSupabase = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockSupabase: any = {
         from: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
@@ -11,7 +13,7 @@ describe('OrderService', () => {
         eq: vi.fn().mockReturnThis(),
         update: vi.fn().mockReturnThis(),
         neq: vi.fn().mockReturnThis(),
-    } as any;
+    };
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -28,20 +30,20 @@ describe('OrderService', () => {
 
     describe('create', () => {
         it('should successfully create an order', async () => {
-            const mockOrder = {
+            const mockOrder: Partial<Order> = {
                 customer_id: 'user-123',
                 address: '123 Main St',
                 lat: 0,
                 lon: 0,
                 vegetables: ['Carrots', 'Potatoes'],
                 status: 'PENDING'
-            } as any;
+            };
 
             const mockResponse = { id: '123', created_at: '2024-01-01', ...mockOrder };
 
             mockSupabase.single.mockResolvedValue({ data: mockResponse, error: null });
             
-            const result = await OrderService.create(mockSupabase, mockOrder);
+            const result = await OrderService.create(mockSupabase, mockOrder as Order);
 
             expect(result).toEqual(mockResponse);
             expect(mockSupabase.from).toHaveBeenCalledWith('orders');
@@ -49,11 +51,11 @@ describe('OrderService', () => {
         });
 
         it('should return null on error during creation', async () => {
-            const mockOrder = { customer_id: 'Fail' } as any;
+            const mockOrder = { customer_id: 'Fail' };
 
             mockSupabase.single.mockResolvedValue({ data: null, error: { message: 'DB Error' } });
             
-            const result = await OrderService.create(mockSupabase, mockOrder);
+            const result = await OrderService.create(mockSupabase, mockOrder as Order);
 
             expect(result).toBeNull();
         });
