@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 
 /**
@@ -16,6 +15,8 @@ type LoginFormState = {
     };
     /** A general status or error message. */
     message?: string;
+    /** The role of the user on success. */
+    role?: string;
 };
 
 /**
@@ -51,8 +52,8 @@ export async function loginUser(formState: LoginFormState, formData: FormData) {
     }
 
     if (data.user.user_metadata?.role === 'admin') {
-        redirect('/admin');
+        return { message: "Success", role: 'admin' };
     }
 
-    redirect('/');
+    return { message: "Success", role: 'customer' };
 }

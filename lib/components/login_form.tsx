@@ -1,13 +1,28 @@
 'use client';
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { loginUser } from "../actions/login";
 
 export default function LoginForm() {
     const [state, action, pending] = useActionState(loginUser, {});
 
+    useEffect(() => {
+        if (state.message === "Success") {
+            if (state.role === 'admin') {
+                window.location.href = '/admin';
+            } else {
+                window.location.href = '/';
+            }
+        }
+    }, [state]);
+
     return (
         <form action={action} className="space-y-4">
+            {state.message === "Success" && (
+                <div className="p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm">
+                    Success! Redirecting...
+                </div>
+            )}
             <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" id="email" name="email" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="Enter your email" />

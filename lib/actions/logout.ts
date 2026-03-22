@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from "next/navigation";
 import { createClient } from "../supabase/server";
 
 /**
@@ -15,7 +14,8 @@ export default async function logout() {
 
     if (error) {
         console.error("Logout error:", error);
-    } else {
-        redirect('/login');
+        return { success: false, error: error.message };
     }
+    
+    return { success: true };
 }

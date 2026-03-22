@@ -49,7 +49,19 @@ export default function Header() {
               <Link href="/" className="px-4 py-2 rounded-md bg-secondary-500 text-white hover:bg-secondary-700 transition cursor-pointer whitespace-nowrap w-full text-center">Driver Dashboard</Link>
               )}
               
-              <button onClick={() => logout()} className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-700 transition cursor-pointer whitespace-nowrap w-full text-center">Logout</button>
+              <button 
+                onClick={async () => {
+                  const result = await logout();
+                  if (result.success) {
+                    window.location.href = '/login';
+                  } else {
+                    alert("Logout failed: " + result.error);
+                  }
+                }} 
+                className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-700 transition cursor-pointer whitespace-nowrap w-full text-center"
+              >
+                Logout
+              </button>
               </>
             ) : (
               <Link href="/login" className="px-4 py-2 rounded-md bg-primary-500 text-white hover:bg-primary-700 transition cursor-pointer whitespace-nowrap w-full text-center">Sign In/ Sign Up</Link>
