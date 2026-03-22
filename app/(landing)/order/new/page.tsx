@@ -16,11 +16,6 @@ export default function NewOrderPage() {
         redirect('/');
     }
 
-    const initialData = {
-        name: session.user.user_metadata?.full_name || '',
-        email: session.user.email || ''
-    };
-
     return (
         <div className="max-w-3xl mx-auto px-4 py-12">
             <div className="mb-8 flex items-center justify-between">
@@ -38,7 +33,7 @@ export default function NewOrderPage() {
             
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 <div className="p-8 md:p-12">
-                    <OrderForm initialData={initialData} />
+                    <OrderForm />
                 </div>
             </div>
             
