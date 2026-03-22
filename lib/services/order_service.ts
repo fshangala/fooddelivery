@@ -149,17 +149,19 @@ export class OrderService {
     }
 
     /**
-     * Retrieves all orders with 'PENDING' status.
+     * Retrieves all orders with 'PENDING' status that are due for delivery (date <= today).
      * 
      * @param supabase - The Supabase client to use for the operation.
      * @returns A promise that resolves to an array of pending Order objects. Returns an empty array on error.
      */
     static async getPendingOrders(supabase: SupabaseClient): Promise<Order[]> {
+        const today = new Date().toISOString().split('T')[0];
         const { data, error } = await supabase
             .from('orders')
             .select('*')
             .eq('status', 'PENDING')
-            .order('created_at', { ascending: true });
+            .lte('delivery_date', today)
+            .order('delivery_date', { ascending: true });
 
         if (error) {
             console.error("Error fetching pending orders:", error.message);

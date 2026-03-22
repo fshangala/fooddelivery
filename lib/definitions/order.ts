@@ -28,4 +28,6 @@ export interface Order {
     lon: number;
     vegetables: string[];
     status: OrderStatus;
+    subscription_id?: string;
+    delivery_date?: string;
 }

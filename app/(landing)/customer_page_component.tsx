@@ -3,30 +3,39 @@
 import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
 import { OrderService } from '@/lib/services/order_service';
+import { SubscriptionService, Subscription } from '@/lib/services/subscription_service';
 import { useAuth } from '@/lib/components/auth_provider';
 import { Order, OrderStatus } from '@/lib/definitions';
 import { createClient } from '@/lib/supabase/client';
+import { Package } from '@/lib/definitions/packages';
 
 type Tab = 'profile' | 'orders';
+
+type SubscriptionWithPackage = Subscription & { packages: Package };
 
 export default function CustomerPageComponent() {
     const session = useAuth();
     const supabase = useMemo(() => createClient(), []);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [subscription, setSubscription] = useState<SubscriptionWithPackage | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<Tab>('orders');
     const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
 
     useEffect(() => {
-        async function fetchOrders() {
+        async function fetchData() {
             if (session?.user?.id) {
                 setLoading(true);
-                const customerOrders = await OrderService.getByCustomerId(supabase, session.user.id);
+                const [customerOrders, activeSub] = await Promise.all([
+                    OrderService.getByCustomerId(supabase, session.user.id),
+                    SubscriptionService.getActiveByUserId(supabase, session.user.id)
+                ]);
                 setOrders(customerOrders);
+                setSubscription(activeSub as SubscriptionWithPackage);
             }
             setLoading(false);
         }
-        fetchOrders();
+        fetchData();
     }, [session?.user?.id, supabase]);
 
     const filteredOrders = useMemo(() => {
@@ -113,7 +122,36 @@ export default function CustomerPageComponent() {
                     )}
 
                     {activeTab === 'orders' && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
+                            {subscription && (
+                                <div className="bg-white p-6 rounded-lg border border-primary-200 shadow-sm bg-gradient-to-r from-primary-50 to-white">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-gray-900 mb-1">Active Subscription</h3>
+                                            <p className="text-primary-700 font-medium text-lg">{subscription.packages?.name} Package</p>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Valid from <span className="font-medium text-gray-900">{new Date(subscription.start_date).toLocaleDateString()}</span> to <span className="font-medium text-gray-900">{new Date(subscription.end_date).toLocaleDateString()}</span>
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                                Active
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <p className="text-sm text-gray-700 font-medium mb-2">Weekly Contents:</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {subscription.packages?.vegetables?.map((veg: string) => (
+                                                <span key={veg} className="px-2 py-1 bg-white border border-gray-200 rounded text-xs text-gray-600 shadow-sm">
+                                                    {veg}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                                 <h3 className="text-lg font-semibold text-gray-900">Order History</h3>
                                 <div className="flex items-center gap-2 w-full sm:w-auto">

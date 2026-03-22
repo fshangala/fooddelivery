@@ -37,10 +37,8 @@
 -   `lib/supabase`: Supabase client configurations for client, server, and middleware.
 
 ## User Roles & Authentication
-- **User Metadata**: Each Supabase user has a `role` field within their `user_metadata`. This defines their access level:
-  - `admin`: Full access to the admin dashboard and order monitoring.
-  - `customer`: Access to personal dashboard and weekly vegetable selection.
-  - `driver`: Access to the tabbed driver dashboard to find, accept, and manage deliveries.
+- **User Metadata**: User roles (admin, customer, driver) are stored directly in the `user_metadata` within Supabase Auth.
+- **Admin Setup (Bootstrap)**: If no admin user exists in the system, the `/admin` dashboard automatically displays a setup form to create the first admin account. This process uses a secure Postgres function (`check_admin_exists`) via RPC to query the `auth.users` table safely.
 - **Authentication**: Uses `@supabase/ssr`. A root `middleware.ts` handles session refreshing.
 - **Session Synchronization**: Login and logout processes utilize hard redirects (`window.location.href`) to ensure the entire page reloads and the authentication state is correctly synchronized across the application.
 - **Client Usage**:

@@ -1,16 +1,18 @@
 import NewOrderModal from "@/lib/components/new_order_modal";
 import { OrderService } from "@/lib/services/order_service";
+import { PackageService } from "@/lib/services/package_service";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminOrdersPage() {
     const supabase = await createClient();
     const orders = await OrderService.getAll(supabase);
+    const activePackages = await PackageService.getActive(supabase);
 
     return (
         <div>
             <div className="flex items-center gap-2 mb-4">
                 <h1 className="text-2xl font-bold">Orders</h1>
-                <NewOrderModal />
+                <NewOrderModal packages={activePackages} />
             </div>
             {orders.length === 0 ? (
                 <div className="p-8 bg-white shadow rounded-md text-center text-gray-500">
