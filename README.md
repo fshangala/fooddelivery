@@ -6,7 +6,7 @@
 
 ## 🚀 Key Features
 
-- **Customer Portal**: Users can register (as a Customer or Driver), log in, and manage their monthly vegetable subscriptions. Deliveries are scheduled on a weekly basis.
+- **Customer Portal**: Users can register (as a Customer or Driver), log in, and manage their monthly vegetable subscriptions. Includes a **Map-based Location Picker** with address search for precise delivery coordinates.
 - **Driver Dashboard**: A comprehensive, tabbed interface for drivers that includes:
   - **Profile & Active**: A profile view and a list of all deliveries currently in progress.
   - **Available**: A real-time queue of all pending orders ready for pickup.
@@ -23,6 +23,7 @@
 - **Framework**: [Next.js 13+](https://nextjs.org) (App Router)
 - **Language**: TypeScript
 - **Styling**: [Tailwind CSS](https://tailwindcss.com)
+- **Maps**: [Leaflet](https://leafletjs.com) & [React-Leaflet](https://react-leaflet.js.org)
 - **Auth & Database**: [Supabase](https://supabase.com) with `@supabase/ssr`
 - **Deployment**: Optimized for [Vercel](https://vercel.com)
 
@@ -76,6 +77,7 @@ middleware.ts # Next.js middleware for session management
 
 ## 💡 Usage Notes
 
+- **Location Picker**: Use the search bar on the map to find your address or click directly on the map to set a precise delivery point.
 - Drivers should click the **Navigate** button on each delivery to open Google Maps directions.
 - Admin and customer interfaces are separated under `(admin)` and `(landing)` route segments.
 - **Supabase Clients**: Always use the appropriate client helper:

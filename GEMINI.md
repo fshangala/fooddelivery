@@ -9,7 +9,7 @@
 ## Core Features
 1.  **Customer Portal**:
     -   **Registration/Login**: Secure authentication via Supabase. Users can register for a 'Customer' or 'Driver' role.
-    -   **Weekly Selection**: Customers select their weekly vegetables from a curated list at `/order/new`.
+    -   **Weekly Selection**: Customers select their weekly vegetables from a curated list at `/order/new`. Includes a map-based location picker with address search for precise delivery instructions.
     -   **Dashboard**: View active subscriptions and order status.
 2.  **Driver Dashboard**:
     -   **Tabbed Interface**: A multi-tab dashboard for drivers to manage their workflow.
@@ -24,6 +24,7 @@
 -   **Framework**: Next.js 13+ (App Router)
 -   **Language**: TypeScript
 -   **Styling**: Tailwind CSS (via global styles and utility classes)
+-   **Maps**: Leaflet & React-Leaflet (with OpenStreetMap/Nominatim for geocoding)
 -   **Database & Auth**: Supabase with `@supabase/ssr` for robust session handling.
 -   **Deployment**: Vercel-ready
 
@@ -41,6 +42,7 @@
   - `customer`: Access to personal dashboard and weekly vegetable selection.
   - `driver`: Access to the tabbed driver dashboard to find, accept, and manage deliveries.
 - **Authentication**: Uses `@supabase/ssr`. A root `middleware.ts` handles session refreshing.
+- **Session Synchronization**: Login and logout processes utilize hard redirects (`window.location.href`) to ensure the entire page reloads and the authentication state is correctly synchronized across the application.
 - **Client Usage**:
   - `lib/supabase/client.ts`: Exports `createClient` for Client Components.
   - `lib/supabase/server.ts`: Exports `createClient` for Server Components/Actions (requires `await`).
@@ -54,5 +56,6 @@
 
 ## Current State
 -   **Vegetable Selection**: Implemented in `/order/new` using the `AVAILABLE_VEGETABLES` constant from `lib/definitions/order.ts`.
--   **Order Storage**: Orders are stored in the `orders` table with a JSON `vegetables` column and `address` field.
+-   **Location Picking**: Interactive map integrated into the order form, allowing users to search for addresses or click to select a point.
+-   **Order Storage**: Orders are stored in the `orders` table with a JSON `vegetables` column, a string `address`, and `lat`/`lon` coordinates for precise delivery.
 -   **SSR Integration**: Full integration with `@supabase/ssr` completed for secure, cookie-based session management across the App Router.
