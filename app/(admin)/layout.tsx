@@ -1,4 +1,5 @@
 import AdminHeader from "@/lib/components/admin_header";
+import Footer from "@/lib/components/footer";
 import { AdminService } from "@/lib/services/admin_service";
 import { createClient } from "@/lib/supabase/server";
 import AdminSetupForm from "@/lib/components/admin_setup_form";
@@ -34,11 +35,12 @@ export default async function AdminLayout({
   }
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <AdminHeader />
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <main className="grow max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 w-full">
         {children}
       </main>
+      <Footer />
     </div>
   );
 }

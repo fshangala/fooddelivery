@@ -60,4 +60,34 @@ export class PackageService {
 
         return data as Package;
     }
+
+    static async update(supabase: SupabaseClient, id: string, pkg: Partial<Omit<Package, 'id' | 'created_at'>>): Promise<Package | null> {
+        const { data, error } = await supabase
+            .from('packages')
+            .update(pkg)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error(`Error updating package ${id}:`, error);
+            return null;
+        }
+
+        return data as Package;
+    }
+
+    static async delete(supabase: SupabaseClient, id: string): Promise<boolean> {
+        const { error } = await supabase
+            .from('packages')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error(`Error deleting package ${id}:`, error);
+            return false;
+        }
+
+        return true;
+    }
 }

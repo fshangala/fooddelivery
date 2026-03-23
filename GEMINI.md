@@ -10,13 +10,14 @@
 1.  **Customer Portal**:
     -   **Registration/Login**: Secure authentication via Supabase. Users can register for a 'Customer' or 'Driver' role.
     -   **Weekly Selection**: Customers select their weekly vegetables from a curated list at `/order/new`. Includes a map-based location picker with address search for precise delivery instructions.
-    -   **Dashboard**: View active subscriptions and order status.
+    -   **Dashboard & Orders**: A landing dashboard for active subscriptions and a dedicated page for detailed order history.
+    -   **Profile**: Dedicated page for account settings and personal information.
 2.  **Driver Dashboard**:
-    -   **Tabbed Interface**: A multi-tab dashboard for drivers to manage their workflow.
-    -   **Profile & Active Orders**: Shows the driver's profile and a list of all deliveries currently in progress.
-    -   **Available Orders**: A queue of pending orders that can be accepted by any driver.
-    -   **Completed Orders**: A history of the driver's completed deliveries.
-    -   **Navigation**: "Navigate" button integrates with Google Maps for easy routing on active orders.
+    -   **Multi-Page Interface**: Dedicated pages for different aspects of the delivery workflow.
+    -   **Profile & Active Orders**: Landing dashboard showing driver profile summary and deliveries in progress.
+    -   **Available Orders**: Dedicated queue of pending orders ready to be accepted at `/available`.
+    -   **Completed Orders**: Comprehensive history of the driver's deliveries at `/history`.
+    -   **Navigation**: "Navigate" button integrates with Google Maps for routing on active orders.
 3.  **Admin Area**:
     -   **Order Management**: Admins monitor all orders, status, and details under `/admin/orders`.
 

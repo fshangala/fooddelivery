@@ -13,42 +13,39 @@ export default function Footer() {
               <span className="text-xl font-bold text-white">PremiumFresh</span>
             </Link>
             <p className="text-sm text-gray-400">
-              Fresh vegetables delivered weekly to your doorstep. Quality and convenience in every box.
+              PremiumFresh is a subscription-based information system for weekly vegetable deliveries, connecting Customers, Drivers, and Administrators through a unified platform.
             </p>
           </div>
           
           <div>
-            <h3 className="text-white font-semibold mb-4">Services</h3>
+            <h3 className="text-white font-semibold mb-4">Customer Portal</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/order/new" className="hover:text-primary-400 transition">Weekly Subscription</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Bulk Orders</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Gift Cards</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Delivery Areas</Link></li>
+              <li><Link href="/order/new" className="hover:text-primary-400 transition">Weekly Selection</Link></li>
+              <li><Link href="/orders" className="hover:text-primary-400 transition">Order History</Link></li>
+              <li><Link href="/profile" className="hover:text-primary-400 transition">Profile Settings</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
+            <h3 className="text-white font-semibold mb-4">Driver Dashboard</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-primary-400 transition">Help Center</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Contact Us</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Shipping Policy</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Returns</Link></li>
+              <li><Link href="/available" className="hover:text-primary-400 transition">Available Orders</Link></li>
+              <li><Link href="/history" className="hover:text-primary-400 transition">Completed Deliveries</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-white font-semibold mb-4">Legal</h3>
+            <h3 className="text-white font-semibold mb-4">Administration</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-primary-400 transition">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Terms of Service</Link></li>
-              <li><Link href="#" className="hover:text-primary-400 transition">Cookie Policy</Link></li>
+              <li><Link href="/admin" className="hover:text-primary-400 transition">Admin Area</Link></li>
+              <li><Link href="/admin/orders" className="hover:text-primary-400 transition">Manage Orders</Link></li>
+              <li><Link href="/admin/packages" className="hover:text-primary-400 transition">Manage Packages</Link></li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-          <p>&copy; {new Date().getFullYear()} PremiumFresh. All rights reserved.</p>
+          <p>&copy; 2026 PremiumFresh. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="https://www.flaticon.com/free-icons/courier" title="courier icons" className="hover:text-gray-100">
               Courier icons by mia elysia - Flaticon

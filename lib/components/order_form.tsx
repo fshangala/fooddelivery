@@ -85,9 +85,9 @@ export default function OrderForm({ packages }: OrderFormProps) {
                             />
                             <div className="flex justify-between items-center mb-4">
                                 <h4 className="text-xl font-bold text-gray-900">{pkg.name}</h4>
-                                {pkg.price && <span className="text-lg font-semibold text-primary-700">${pkg.price}</span>}
+                                {pkg.price && <span className="text-lg font-semibold text-primary-700">ZMW {pkg.price}</span>}
                             </div>
-                            <div className="flex-grow">
+                            <div className="grow">
                                 <p className="text-sm text-gray-500 mb-3 font-medium">Includes:</p>
                                 <ul className="space-y-1 text-sm text-gray-600">
                                     {pkg.vegetables.map(v => (
@@ -109,7 +109,7 @@ export default function OrderForm({ packages }: OrderFormProps) {
                 <label className="block text-lg font-medium text-gray-900 mb-2">Delivery Location</label>
                 <p className="text-sm text-gray-500 mb-4">Search for your address or click on the map.</p>
                 
-                <div className="h-[400px] rounded-xl overflow-hidden shadow-sm border border-gray-300">
+                <div className="h-100 rounded-xl overflow-hidden shadow-sm border border-gray-300">
                     <Map onLocationChange={handleLocationChange} />
                 </div>
                 

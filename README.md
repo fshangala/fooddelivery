@@ -6,9 +6,9 @@
 
 ## 🚀 Key Features
 
-- **Customer Portal**: Users can register (as a Customer or Driver), log in, and manage their monthly vegetable subscriptions. Includes a **Map-based Location Picker** with address search for precise delivery coordinates.
-- **Driver Dashboard**: A comprehensive, tabbed interface for drivers that includes:
-  - **Profile & Active**: A profile view and a list of all deliveries currently in progress.
+- **Customer Portal**: Users can manage their monthly vegetable subscriptions through a dedicated dashboard. Separate pages are available for **Order History** and **Profile Settings**. Includes a **Map-based Location Picker** with address search for precise delivery coordinates.
+- **Driver Dashboard**: A streamlined interface for drivers to manage their workflow across dedicated pages:
+  - **Dashboard**: A summary view of the driver's profile and active deliveries.
   - **Available**: A real-time queue of all pending orders ready for pickup.
   - **History**: A record of all completed deliveries.
   - Each active delivery includes a **Navigate** button that opens Google Maps for routing.

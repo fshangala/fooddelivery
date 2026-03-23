@@ -5,17 +5,15 @@ import { OrderService } from '@/lib/services/order_service';
 import { useAuth } from '@/lib/components/auth_provider';
 import { Order } from '@/lib/definitions';
 import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 export default function DriverPageComponent() {
     const session = useAuth();
     const supabase = useMemo(() => createClient(), []);
     
-    const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
+    const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
     const [activeOrders, setActiveOrders] = useState<Order[]>([]);
-    const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
-    
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'profile' | 'available' | 'completed'>('profile');
 
     const userId = session?.user?.id;
 
@@ -23,46 +21,20 @@ export default function DriverPageComponent() {
         if (!userId) return;
         
         setLoading(true);
-        const [pending, active, completed] = await Promise.all([
+        const [pending, active] = await Promise.all([
             OrderService.getPendingOrders(supabase),
-            OrderService.getActiveOrdersByDriver(supabase, userId),
-            OrderService.getCompletedOrdersByDriver(supabase, userId)
+            OrderService.getActiveOrdersByDriver(supabase, userId)
         ]);
-        setPendingOrders(pending);
+        setPendingOrdersCount(pending.length);
         setActiveOrders(active);
-        setCompletedOrders(completed);
         setLoading(false);
-
-        // Smart tab selection
-        if (active.length > 0) {
-            setActiveTab('profile');
-        } else if (pending.length > 0) {
-            setActiveTab('available');
-        } else {
-            setActiveTab('profile');
-        }
     }, [userId, supabase]);
 
     useEffect(() => {
-        const load = async () => {
-            if (userId) {
-                await fetchData();
-            }
-        };
-        load();
-    }, [fetchData, userId]);
-
-    const handleAcceptOrder = async (orderId: string) => {
-        if (!session?.user?.id) return;
-        
-        const success = await OrderService.assignDriver(supabase, orderId, session.user.id);
-        if (success) {
-            fetchData();
-        } else {
-            alert('Failed to accept order. It might have been taken by another driver.');
+        if (userId) {
             fetchData();
         }
-    };
+    }, [fetchData, userId]);
 
     const handleNavigate = (lat: number, lon: number) => {
         const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
@@ -84,124 +56,90 @@ export default function DriverPageComponent() {
     return (
         <div className="flex flex-col items-center min-h-screen bg-gray-50 px-4 py-12">
             <div className="max-w-4xl w-full">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-gray-800 mb-2">Driver Dashboard</h1>
-                    <p className="text-gray-600">Manage your deliveries efficiently</p>
+                <div className="flex justify-between items-end mb-8">
+                    <div>
+                        <h1 className="text-4xl font-bold text-gray-800 mb-2">Driver Dashboard</h1>
+                        <p className="text-gray-600 font-medium">Welcome back, {name}</p>
+                    </div>
+                    <div className="text-right">
+                        <Link href="/available" className="inline-flex items-center px-6 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-200 relative">
+                            Available Orders
+                            {pendingOrdersCount > 0 && (
+                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white animate-bounce">
+                                    {pendingOrdersCount}
+                                </span>
+                            )}
+                        </Link>
+                    </div>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-2 mb-6 bg-gray-200 p-1 rounded-lg">
-                    <button 
-                        onClick={() => setActiveTab('profile')}
-                        className={`py-3 font-bold rounded-md transition ${activeTab === 'profile' 
-                            ? 'bg-white text-primary-600 shadow' 
-                            : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
-                    >
-                        Profile & Active ({activeOrders.length})
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('available')}
-                        className={`py-3 font-bold rounded-md transition ${activeTab === 'available' 
-                            ? 'bg-white text-primary-600 shadow' 
-                            : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
-                    >
-                        Available ({pendingOrders.length})
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('completed')}
-                        className={`py-3 font-bold rounded-md transition ${activeTab === 'completed' 
-                            ? 'bg-white text-primary-600 shadow' 
-                            : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
-                    >
-                        History ({completedOrders.length})
-                    </button>
-                </div>
-
-                {loading ? (
-                    <div className="flex justify-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        {activeTab === 'profile' && (
+                <main className="space-y-8">
+                    {/* Stats/Profile Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                            <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 text-2xl font-bold uppercase">
+                                {name?.charAt(0) || 'D'}
+                            </div>
                             <div>
-                                <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-1">{name}</h2>
-                                    <p className="text-gray-600">{email}</p>
+                                <h2 className="text-xl font-bold text-gray-900">{name}</h2>
+                                <p className="text-sm text-gray-500">{email}</p>
+                            </div>
+                        </div>
+                        <Link href="/history" className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center items-center group hover:border-primary-200 transition-all">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Deliveries</span>
+                            <span className="text-3xl font-black text-gray-900 group-hover:text-primary-600 transition-colors">View History</span>
+                        </Link>
+                    </div>
+
+                    {/* Active Deliveries */}
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                            <span className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+                            Active Deliveries
+                        </h3>
+                        
+                        {loading ? (
+                            <div className="flex justify-center py-12 bg-white rounded-2xl border border-gray-100">
+                                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+                            </div>
+                        ) : activeOrders.length === 0 ? (
+                            <div className="bg-white p-12 rounded-2xl shadow-sm text-center text-gray-500 border border-dashed border-gray-300">
+                                <div className="mx-auto w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-3xl">🚚</div>
+                                <p className="text-lg font-medium text-gray-900 mb-1">No active deliveries</p>
+                                <p className="mb-6">Ready for a new task? Check the available orders queue.</p>
+                                <Link href="/available" className="text-primary-600 font-bold hover:underline">Pick up an order &rarr;</Link>
+                            </div>
+                        ) : (
+                            activeOrders.map(order => (
+                                <div key={order.id} className="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-primary-500 mb-4 border border-gray-100">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <h3 className="text-lg font-bold text-gray-900">Delivery #{order.id.slice(0, 8)}</h3>
+                                                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-black rounded-full uppercase tracking-tighter">IN PROGRESS</span>
+                                            </div>
+                                            <p className="text-gray-600 font-medium">{order.address}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Assigned At</p>
+                                            <p className="text-sm font-bold text-gray-700">{new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button onClick={() => handleNavigate(order.lat, order.lon)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-bold transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            Navigate
+                                        </button>
+                                        <button onClick={() => handleComplete(order.id)} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-bold transition shadow-lg shadow-green-100 flex items-center justify-center gap-2">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                            Complete
+                                        </button>
+                                    </div>
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-700 mb-4">Active Deliveries</h3>
-                                {activeOrders.length === 0 ? (
-                                    <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500">
-                                        <p>No active deliveries. Check the &quot;Available&quot; tab!</p>
-                                    </div>
-                                ) : (
-                                    activeOrders.map(order => (
-                                        <div key={order.id} className="bg-white p-6 rounded-lg shadow-sm border-l-4 border-primary-500 mb-4">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-gray-900">Delivery #{order.id.slice(0, 8)}</h3>
-                                                    <p className="text-gray-600">{order.address}</p>
-                                                </div>
-                                                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">IN PROGRESS</span>
-                                            </div>
-                                            <div className="flex gap-3">
-                                                <button onClick={() => handleNavigate(order.lat, order.lon)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition">Navigate</button>
-                                                <button onClick={() => handleComplete(order.id)} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition">Mark Delivered</button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === 'available' && (
-                            <div>
-                                <h3 className="text-xl font-semibold text-gray-700 mb-4">Available for Pickup</h3>
-                                {pendingOrders.length === 0 ? (
-                                    <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500">
-                                        <p>No new orders available right now. Check back later!</p>
-                                    </div>
-                                ) : (
-                                    pendingOrders.map(order => (
-                                        <div key={order.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition mb-4">
-                                            <div className="flex justify-between items-center mb-3">
-                                                <span className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">PENDING</span>
-                                            </div>
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{order.address}</h3>
-                                            <button onClick={() => handleAcceptOrder(order.id)} className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium transition">Accept Delivery</button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        )}
-
-                        {activeTab === 'completed' && (
-                             <div>
-                                <h3 className="text-xl font-semibold text-gray-700 mb-4">Completed Deliveries</h3>
-                                {completedOrders.length === 0 ? (
-                                    <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500">
-                                        <p>You haven&apos;t completed any deliveries yet.</p>
-                                    </div>
-                                ) : (
-                                    completedOrders.map(order => (
-                                        <div key={order.id} className="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500 mb-4">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <h4 className="font-bold text-gray-800">Order #{order.id.slice(0, 8)}</h4>
-                                                    <p className="text-sm text-gray-600">{order.address}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-sm text-gray-500">Completed on</p>
-                                                    <p className="font-medium text-gray-700">{new Date(order.created_at).toLocaleDateString()}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
+                            ))
                         )}
                     </div>
-                )}
+                </main>
             </div>
         </div>
     );

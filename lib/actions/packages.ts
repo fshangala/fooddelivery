@@ -1,24 +1,15 @@
 'use server';
 
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { PackageService } from "../services/package_service";
 import { createClient } from "../supabase/server";
 import { CreatePackageState } from "../definitions/packages";
 
-export async function createPackage(formState: CreatePackageState, formData: FormData): Promise<CreatePackageState> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user || user.user_metadata?.role !== 'admin') {
-        return {
-            message: "Unauthorized: Only admins can create packages."
-        };
-    }
-
+function validatePackageData(formData: FormData) {
     const name = formData.get('name') as string;
     const priceStr = formData.get('price') as string;
     const vegetables = formData.getAll('vegetables') as string[];
-    const isActive = formData.get('is_active') === 'on'; // Checkbox
+    const isActive = formData.get('is_active') === 'on';
 
     const errors: CreatePackageState['errors'] = {};
 
@@ -30,7 +21,6 @@ export async function createPackage(formState: CreatePackageState, formData: For
         errors._form = ["Valid price is required."];
     }
 
-    // Mandatory vegetables check
     const mandatory = ["Tomatoes", "Onions", "Peppers"];
     const missing = mandatory.filter(v => !vegetables.includes(v));
 
@@ -38,25 +28,78 @@ export async function createPackage(formState: CreatePackageState, formData: For
         errors.vegetables = [`Package must include: ${missing.join(', ')}`];
     }
 
-    if (Object.keys(errors).length > 0) {
+    return {
+        errors,
+        isValid: Object.keys(errors).length === 0,
+        data: {
+            name,
+            price: parseFloat(priceStr),
+            vegetables,
+            is_active: isActive,
+            image_url: ''
+        }
+    };
+}
+
+export async function createPackage(formState: CreatePackageState, formData: FormData): Promise<CreatePackageState> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || user.user_metadata?.role !== 'admin') {
+        return { message: "Unauthorized: Only admins can create packages." };
+    }
+
+    const { errors, isValid, data } = validatePackageData(formData);
+
+    if (!isValid) {
         return { errors, message: "Validation failed." };
     }
 
-    const price = parseFloat(priceStr);
-
-    const newPackage = {
-        name,
-        price,
-        vegetables,
-        is_active: isActive,
-        image_url: '' // Optional for now
-    };
-
-    const result = await PackageService.create(supabase, newPackage);
+    const result = await PackageService.create(supabase, data);
 
     if (!result) {
         return { message: "Failed to create package. Database error." };
     }
 
-    redirect('/admin/packages');
+    revalidatePath('/admin/packages');
+    return { message: "Package created successfully!" };
+}
+
+export async function updatePackage(id: string, formState: CreatePackageState, formData: FormData): Promise<CreatePackageState> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || user.user_metadata?.role !== 'admin') {
+        return { message: "Unauthorized: Only admins can update packages." };
+    }
+
+    const { errors, isValid, data } = validatePackageData(formData);
+
+    if (!isValid) {
+        return { errors, message: "Validation failed." };
+    }
+
+    const result = await PackageService.update(supabase, id, data);
+
+    if (!result) {
+        return { message: "Failed to update package. Database error." };
+    }
+
+    revalidatePath('/admin/packages');
+    return { message: "Package updated successfully!" };
+}
+
+export async function deletePackage(id: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || user.user_metadata?.role !== 'admin') {
+        throw new Error("Unauthorized");
+    }
+
+    const result = await PackageService.delete(supabase, id);
+    if (result) {
+        revalidatePath('/admin/packages');
+    }
+    return result;
 }
