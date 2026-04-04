@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=cygrsyafgrdanifrglax&features=docs%2Cdatabase%2Cdebugging%2Cstorage%2Cdevelopment",
+      "type": "http"
+    }
+  }
+}

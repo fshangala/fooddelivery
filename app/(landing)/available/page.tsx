@@ -26,7 +26,6 @@ export default function AvailableOrdersPage() {
 
     const fetchData = useCallback(async () => {
         if (!userId || role !== 'driver') return;
-        setLoading(true);
         const pending = await OrderService.getPendingOrders(supabase);
         setPendingOrders(pending);
         setLoading(false);
@@ -34,12 +33,13 @@ export default function AvailableOrdersPage() {
 
     useEffect(() => {
         if (userId && role === 'driver') {
-            fetchData();
+            Promise.resolve().then(() => fetchData());
         }
     }, [fetchData, userId, role]);
 
     const handleAcceptOrder = async (orderId: string) => {
         if (!session?.user?.id) return;
+        setLoading(true);
         const success = await OrderService.assignDriver(supabase, orderId, session.user.id);
         if (success) {
             fetchData();

@@ -21,7 +21,6 @@ export default function DriverPageComponent() {
     const fetchData = useCallback(async () => {
         if (!userId) return;
         
-        setLoading(true);
         const [pending, active] = await Promise.all([
             OrderService.getPendingOrders(supabase),
             OrderService.getActiveOrdersByDriver(supabase, userId)
@@ -33,7 +32,7 @@ export default function DriverPageComponent() {
 
     useEffect(() => {
         if (userId) {
-            fetchData();
+            Promise.resolve().then(() => fetchData());
         }
     }, [fetchData, userId]);
 
@@ -43,6 +42,7 @@ export default function DriverPageComponent() {
     };
 
     const handleComplete = async (orderId: string) => {
+        setLoading(true);
         const success = await OrderService.updateStatus(supabase, orderId, 'DELIVERED');
         if (success) {
             fetchData();

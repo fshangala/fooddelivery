@@ -27,15 +27,14 @@ export default function OrdersPage() {
 
     const fetchData = useCallback(async () => {
         if (session?.user?.id && role === 'customer') {
-            setLoading(true);
             const customerOrders = await OrderService.getByCustomerId(supabase, session.user.id);
             setOrders(customerOrders);
             setLoading(false);
         }
-    }, [session?.user?.id, role, supabase]);
+    }, [session, role, supabase]);
 
     useEffect(() => {
-        fetchData();
+        Promise.resolve().then(() => fetchData());
     }, [fetchData]);
 
     const filteredOrders = useMemo(() => {

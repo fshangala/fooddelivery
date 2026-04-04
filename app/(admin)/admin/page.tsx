@@ -13,7 +13,6 @@ export default async function Dashboard() {
 
   // For a real app, we'd have more robust ways to count these, but using current services:
   const activeOrders = allOrders.filter(o => o.status === 'IN_PROGRESS').length;
-  const completedOrders = allOrders.filter(o => o.status === 'DELIVERED').length;
   
   // Get active subscriptions count
   const { count: activeSubs } = await supabase
@@ -138,7 +137,7 @@ export default async function Dashboard() {
           <div className="bg-linear-to-br from-secondary-600 to-primary-600 p-6 rounded-xl shadow-lg text-white">
             <h3 className="text-lg font-bold mb-2">Admin Notice</h3>
             <p className="text-white/80 text-sm mb-4">
-              Remember to update next week's vegetable offerings by Friday at midnight to ensure accurate customer selections.
+              Remember to update next&apos;s vegetable offerings by Friday at midnight to ensure accurate customer selections.
             </p>
             <Link href="/admin/packages" className="block w-full py-2 bg-white/20 hover:bg-white/30 transition text-center rounded-lg text-sm font-bold backdrop-blur-sm border border-white/30">
               Go to Packages

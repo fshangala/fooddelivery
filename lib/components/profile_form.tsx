@@ -12,13 +12,6 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
     const [state, action, pending] = useActionState(updateProfileAction, {});
     const [phoneNumber, setPhoneNumber] = useState(profile.phone?.slice(4) || ""); // Remove +260 prefix if it exists
 
-    // Sync phone number state with prop if it changes
-    useEffect(() => {
-        if (profile.phone) {
-            setPhoneNumber(profile.phone.slice(4));
-        }
-    }, [profile.phone]);
-
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value.replace(/\D/g, '').slice(0, 9);
         setPhoneNumber(val);

@@ -27,7 +27,6 @@ export default function DeliveryHistoryPage() {
 
     const fetchData = useCallback(async () => {
         if (!userId || role !== 'driver') return;
-        setLoading(true);
         const completed = await OrderService.getCompletedOrdersByDriver(supabase, userId);
         setHistory(completed);
         setLoading(false);
@@ -35,7 +34,7 @@ export default function DeliveryHistoryPage() {
 
     useEffect(() => {
         if (userId && role === 'driver') {
-            fetchData();
+            Promise.resolve().then(() => fetchData());
         }
     }, [fetchData, userId, role]);
 

@@ -13,7 +13,7 @@ export default function ProfilePage() {
     const role = profile?.role;
 
     useEffect(() => {
-        if (session && profile && !['customer', 'driver'].includes(role)) {
+        if (session && profile && role && !['customer', 'driver'].includes(role)) {
             router.replace('/');
         }
     }, [session, profile, role, router]);
@@ -26,7 +26,7 @@ export default function ProfilePage() {
         );
     }
 
-    if (!['customer', 'driver'].includes(role)) return null;
+    if (!role || !['customer', 'driver'].includes(role)) return null;
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-8">
