@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { updateProfileAction } from "../actions/profile";
 import { Profile } from "../definitions";
 

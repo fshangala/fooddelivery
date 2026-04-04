@@ -9,7 +9,6 @@ export default function LoginPage() {
                 <Suspense fallback={<div className="text-center text-gray-500">Loading form...</div>}>
                     <LoginForm />
                 </Suspense>
-                <a href="/register" className="block text-center text-primary-600 hover:underline">Create an account</a>
             </div>
         </div>
     );

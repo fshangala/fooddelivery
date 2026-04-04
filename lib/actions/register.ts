@@ -2,7 +2,6 @@
 
 import { UserRole } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
 /**
@@ -24,6 +23,8 @@ type RegisterFormState = {
     };
     /** A general status or error message. */
     message?: string;
+    /** Whether the registration was successful. */
+    success?: boolean;
 };
 
 /**
@@ -36,7 +37,7 @@ type RegisterFormState = {
  * @param formState - The current state of the registration form.
  * @param formData - The form data containing registration fields.
  * @returns A promise that resolves to the updated RegisterFormState on validation error or failure.
- *          Redirects to '/' upon successful registration.
+ *          Returns success message upon successful registration.
  */
 export async function registerUser(formState: RegisterFormState | undefined, formData: FormData) {
     const errorData: RegisterFormState = {};
@@ -73,7 +74,7 @@ export async function registerUser(formState: RegisterFormState | undefined, for
 
     const supabase = await createClient();
     const origin = (await headers()).get('origin');
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
         email, 
         password, 
         options: { 
@@ -84,8 +85,12 @@ export async function registerUser(formState: RegisterFormState | undefined, for
 
     if (error) {
         errorData.message = error.message;
+        errorData.success = false;
         return errorData;
     }
 
-    redirect('/');
+    return {
+        success: true,
+        message: "Successfully registered! Please check your email for a confirmation link."
+    };
 }

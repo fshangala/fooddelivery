@@ -16,7 +16,7 @@ export default function PackageManagement({ initialPackages }: PackageManagement
         if (confirm('Are you sure you want to delete this package?')) {
             try {
                 await deletePackage(id);
-            } catch (error) {
+            } catch {
                 alert('Failed to delete package.');
             }
         }

@@ -48,14 +48,9 @@
   - `lib/supabase/server.ts`: Exports `createClient` for Server Components/Actions (requires `await`).
 
 ## Development Guidelines
+-   **Next.js: ALWAYS read docs before coding**: Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 -   **Server Actions**: Use `use server` for all form submissions and data mutations. Always initialize a server-side Supabase client within the action.
 -   **Client Components**: Use `use client` for interactive UI elements.
 -   **Authentication**: Use `useAuth` hook for client-side session access; use the server client to verify sessions for protected actions/components.
 -   **Service Pattern**: `OrderService` methods require a `SupabaseClient` instance to be passed as the first argument to ensure the correct context (client vs server) is used.
 -   **Styling**: Prioritize Tailwind CSS utility classes for consistent design.
-
-## Current State
--   **Vegetable Selection**: Implemented in `/order/new` using the `AVAILABLE_VEGETABLES` constant from `lib/definitions/order.ts`.
--   **Location Picking**: Interactive map integrated into the order form, allowing users to search for addresses or click to select a point.
--   **Order Storage**: Orders are stored in the `orders` table with a JSON `vegetables` column, a string `address`, and `lat`/`lon` coordinates for precise delivery.
--   **SSR Integration**: Full integration with `@supabase/ssr` completed for secure, cookie-based session management across the App Router.

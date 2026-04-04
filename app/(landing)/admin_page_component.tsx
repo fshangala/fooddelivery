@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth, useProfile } from '@/lib/components/auth_provider';
+import { useProfile } from '@/lib/components/auth_provider';
 
 export default function AdminPageComponent() {
-    const session = useAuth();
     const profile = useProfile();
 
     return (

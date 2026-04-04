@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { createClient } from "../supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { Profile } from "../definitions";
@@ -24,11 +24,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const supabase = createClient();
 
-    const fetchProfile = async (userId: string) => {
+    const fetchProfile = useCallback(async (userId: string) => {
         const profile = await ProfileService.getProfile(supabase, userId);
         setCurrentProfile(profile);
         setLoading(false);
-    };
+    }, [supabase]);
 
     useEffect(() => {
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => {
             data.subscription.unsubscribe();
         };
-    }, []);
+    }, [supabase.auth, fetchProfile]);
 
   return (
     <AuthContext.Provider value={{ session: currentSession, profile: currentProfile, loading }}>
