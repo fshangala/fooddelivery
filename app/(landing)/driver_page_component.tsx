@@ -77,15 +77,15 @@ export default function DriverPageComponent() {
                 <main className="space-y-8">
                     {/* Stats/Profile Summary */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                            <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 text-2xl font-bold uppercase">
+                        <Link href="/profile" className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 group hover:border-primary-200 transition-all">
+                            <div className="h-16 w-16 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 text-2xl font-bold uppercase group-hover:bg-primary-200 transition-colors">
                                 {name?.charAt(0) || 'D'}
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">{name}</h2>
+                                <h2 className="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">{name}</h2>
                                 <p className="text-sm text-gray-500">{email}</p>
                             </div>
-                        </div>
+                        </Link>
                         <Link href="/history" className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center items-center group hover:border-primary-200 transition-all">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Deliveries</span>
                             <span className="text-3xl font-black text-gray-900 group-hover:text-primary-600 transition-colors">View History</span>
