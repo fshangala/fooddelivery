@@ -2,7 +2,6 @@
 
 import { createClient } from "../supabase/server";
 import { AdminService } from "../services/admin_service";
-import { redirect } from "next/navigation";
 
 type AdminRegisterState = {
     errors?: {
@@ -12,6 +11,7 @@ type AdminRegisterState = {
         confirmPassword?: string;
     };
     message?: string;
+    success?: boolean;
 };
 
 /**
@@ -45,11 +45,14 @@ export async function registerFirstAdmin(formState: AdminRegisterState | undefin
     // CRITICAL: Double-check if admin exists before allowing creation
     const adminExists = await AdminService.exists(supabase);
     if (adminExists) {
-        return { message: "Setup complete. An admin already exists. No further admins can be created this way." };
+        return { 
+            success: false,
+            message: "Setup complete. An admin already exists. No further admins can be created this way." 
+        };
     }
 
     // Attempt to sign up the first admin
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
         email, 
         password, 
         options: { 
@@ -58,10 +61,15 @@ export async function registerFirstAdmin(formState: AdminRegisterState | undefin
     });
 
     if (error) {
-        return { message: error.message };
+        return { 
+            success: false,
+            message: error.message 
+        };
     }
 
-    // On success, redirect to login so they can sign in as the new admin
-    // Use hard redirect for state sync
-    return { message: "Success" };
+    // On success, return success message
+    return { 
+        success: true,
+        message: "Successfully registered! Please check your email for a confirmation link." 
+    };
 }

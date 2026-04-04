@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -9,7 +10,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <img src="/logo.png" alt="PremiumFresh Logo" className="h-8 filter brightness-0 invert" />
+              <Image src="/logo.png" alt="PremiumFresh Logo" width={32} height={32} className="h-8 w-auto filter brightness-0 invert" />
               <span className="text-xl font-bold text-white">PremiumFresh</span>
             </Link>
             <p className="text-sm text-gray-400">

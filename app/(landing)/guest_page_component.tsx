@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function GuestPageComponent() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-primary-100 to-secondary-100 p-6">

@@ -6,6 +6,19 @@ import { useActionState } from "react";
 export default function RegisterForm() {
     const [state, action, pending] = useActionState(registerUser, {});
 
+    if (state?.success) {
+        return (
+            <div className="bg-green-50 border border-green-200 text-green-800 rounded-md p-4 mb-4">
+                <p className="font-medium text-center">{state.message}</p>
+                <div className="mt-4 text-center">
+                    <a href="/login" className="text-primary-600 hover:underline font-semibold">
+                        Go to Login
+                    </a>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <form className="space-y-4" action={action}>
             <div>
@@ -42,7 +55,7 @@ export default function RegisterForm() {
                 {state?.errors?.role && <p className="text-red-500 text-sm mt-1">{state.errors.role}</p>}
             </div>
             <div>
-                {state?.message && <p className="text-red-500 text-sm mt-1">{state.message}</p>}
+                {state?.message && !state.success && <p className="text-red-500 text-sm mt-1">{state.message}</p>}
             </div>
             <button 
                 type="submit" 
