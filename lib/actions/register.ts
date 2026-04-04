@@ -3,6 +3,7 @@
 import { UserRole } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 /**
  * State object representing the validation and operation results of the registration form.
@@ -29,7 +30,8 @@ type RegisterFormState = {
  * Server Action to register a new user with Supabase Auth.
  * 
  * Validates 'name', 'email', 'password', and 'confirmPassword'.
- * On success, signs up the user with user_metadata containing their name and role.
+ * On success, signs up the user. A database trigger automatically creates 
+ * a record in the 'profiles' table with the provided name and role.
  * 
  * @param formState - The current state of the registration form.
  * @param formData - The form data containing registration fields.
@@ -70,7 +72,15 @@ export async function registerUser(formState: RegisterFormState | undefined, for
     }
 
     const supabase = await createClient();
-    const { data, error } = await supabase.auth.signUp({email, password, options: { data: { name, role }, }, });
+    const origin = (await headers()).get('origin');
+    const { data, error } = await supabase.auth.signUp({
+        email, 
+        password, 
+        options: { 
+            data: { name, role },
+            emailRedirectTo: `${origin}/login?email_comfirmation=success`,
+        }, 
+    });
 
     if (error) {
         errorData.message = error.message;

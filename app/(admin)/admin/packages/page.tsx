@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PackageService } from "@/lib/services/package_service";
+import { ProfileService } from "@/lib/services/profile_service";
 import PackageManagement from "@/lib/components/package_management";
 import { redirect } from "next/navigation";
 
@@ -7,8 +8,14 @@ export default async function PackagesPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!user) {
         redirect('/login');
+    }
+
+    const profile = await ProfileService.getProfile(supabase, user.id);
+
+    if (profile?.role !== 'admin') {
+        redirect('/');
     }
 
     const packages = await PackageService.getAll(supabase);

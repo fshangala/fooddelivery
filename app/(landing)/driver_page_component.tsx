@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { OrderService } from '@/lib/services/order_service';
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 import { Order } from '@/lib/definitions';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
 export default function DriverPageComponent() {
     const session = useAuth();
+    const profile = useProfile();
     const supabase = useMemo(() => createClient(), []);
     
     const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
@@ -20,7 +21,6 @@ export default function DriverPageComponent() {
     const fetchData = useCallback(async () => {
         if (!userId) return;
         
-        setLoading(true);
         const [pending, active] = await Promise.all([
             OrderService.getPendingOrders(supabase),
             OrderService.getActiveOrdersByDriver(supabase, userId)
@@ -32,7 +32,7 @@ export default function DriverPageComponent() {
 
     useEffect(() => {
         if (userId) {
-            fetchData();
+            Promise.resolve().then(() => fetchData());
         }
     }, [fetchData, userId]);
 
@@ -42,6 +42,7 @@ export default function DriverPageComponent() {
     };
 
     const handleComplete = async (orderId: string) => {
+        setLoading(true);
         const success = await OrderService.updateStatus(supabase, orderId, 'DELIVERED');
         if (success) {
             fetchData();
@@ -50,8 +51,8 @@ export default function DriverPageComponent() {
         }
     };
 
-    const name = session?.user?.user_metadata.name;
-    const email = session?.user?.email;
+    const name = profile?.name;
+    const email = profile?.email;
 
     return (
         <div className="flex flex-col items-center min-h-screen bg-gray-50 px-4 py-12">

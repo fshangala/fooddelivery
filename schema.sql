@@ -3,18 +3,63 @@
 -- Ensure the UUID extension is enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Profiles Table
+-- Stores additional user information like role, name, and phone.
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    name TEXT,
+    role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'driver', 'admin')),
+    email TEXT,
+    phone TEXT
+);
+
+-- Enable Row Level Security (RLS) on the profiles table
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Profiles RLS Policies
+-- Users can read their own profile.
+CREATE POLICY "Users can view their own profile" ON profiles
+    FOR SELECT USING (auth.uid() = id);
+
+-- Users can update their own profile.
+CREATE POLICY "Users can update their own profile" ON profiles
+    FOR UPDATE USING (auth.uid() = id);
+
+-- Public access to check if an admin exists (used during bootstrap)
+CREATE POLICY "Public can view admin existence" ON profiles
+    FOR SELECT USING (role = 'admin');
+
 -- Admin Existence Check Function
--- Allows checking if an admin exists in auth.users from the public schema.
--- This is used for the bootstrap process without needing a separate profiles table.
+-- Allows checking if an admin exists in profiles from the public schema.
 CREATE OR REPLACE FUNCTION public.check_admin_exists()
 RETURNS boolean AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM auth.users 
-    WHERE raw_user_meta_data->>'role' = 'admin'
+    SELECT 1 FROM public.profiles 
+    WHERE role = 'admin'
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to create a profile after a user signs up
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, name, role, email)
+  VALUES (
+    new.id, 
+    new.raw_user_meta_data->>'name', 
+    new.raw_user_meta_data->>'role', 
+    new.email
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- Packages Table
 -- Stores available subscription packages created by admins.

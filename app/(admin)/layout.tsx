@@ -1,6 +1,7 @@
 import AdminHeader from "@/lib/components/admin_header";
 import Footer from "@/lib/components/footer";
 import { AdminService } from "@/lib/services/admin_service";
+import { ProfileService } from "@/lib/services/profile_service";
 import { createClient } from "@/lib/supabase/server";
 import AdminSetupForm from "@/lib/components/admin_setup_form";
 import { redirect } from "next/navigation";
@@ -30,7 +31,9 @@ export default async function AdminLayout({
     redirect('/login');
   }
 
-  if (user.user_metadata?.role !== 'admin') {
+  const profile = await ProfileService.getProfile(supabase, user.id);
+
+  if (profile?.role !== 'admin') {
     redirect('/');
   }
 

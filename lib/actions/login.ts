@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from "../supabase/server";
+import { ProfileService } from "../services/profile_service";
 
 /**
  * State object representing the validation and operation results of the login form.
@@ -51,9 +52,11 @@ export async function loginUser(formState: LoginFormState, formData: FormData) {
         return errorData;
     }
 
-    if (data.user.user_metadata?.role === 'admin') {
+    const profile = await ProfileService.getProfile(supabase, data.user.id);
+
+    if (profile?.role === 'admin') {
         return { message: "Success", role: 'admin' };
     }
 
-    return { message: "Success", role: 'customer' };
+    return { message: "Success", role: profile?.role || 'customer' };
 }

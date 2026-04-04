@@ -50,6 +50,7 @@ export default function AdminHeader() {
               <Link href="/admin" onClick={() => setIsOpen(false)} className="px-4 py-2 rounded-md hover:bg-gray-100 text-gray-700 transition cursor-pointer whitespace-nowrap w-full text-left text-sm font-medium">Dashboard</Link>
               <Link href="/admin/orders" onClick={() => setIsOpen(false)} className="px-4 py-2 rounded-md hover:bg-gray-100 text-gray-700 transition cursor-pointer whitespace-nowrap w-full text-left text-sm font-medium">Orders</Link>
               <Link href="/admin/packages" onClick={() => setIsOpen(false)} className="px-4 py-2 rounded-md hover:bg-gray-100 text-gray-700 transition cursor-pointer whitespace-nowrap w-full text-left text-sm font-medium">Packages</Link>
+              <Link href="/admin/profile" onClick={() => setIsOpen(false)} className="px-4 py-2 rounded-md hover:bg-gray-100 text-gray-700 transition cursor-pointer whitespace-nowrap w-full text-left text-sm font-medium">My Profile</Link>
               <div className="h-px bg-gray-100 w-full my-1"></div>
               <button 
                 onClick={handleLogout}

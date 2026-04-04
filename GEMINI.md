@@ -38,8 +38,9 @@
 -   `lib/supabase`: Supabase client configurations for client, server, and middleware.
 
 ## User Roles & Authentication
-- **User Metadata**: User roles (admin, customer, driver) are stored directly in the `user_metadata` within Supabase Auth.
-- **Admin Setup (Bootstrap)**: If no admin user exists in the system, the `/admin` dashboard automatically displays a setup form to create the first admin account. This process uses a secure Postgres function (`check_admin_exists`) via RPC to query the `auth.users` table safely.
+- **Profiles Table**: User roles (admin, customer, driver) and profile details (name, phone) are stored in a dedicated `profiles` table in the `public` schema.
+- **Role Enforcement**: User roles are verified server-side using the `ProfileService` and client-side using the `useProfile` hook from the `AuthProvider`.
+- **Admin Setup (Bootstrap)**: If no admin user exists in the system, the `/admin` dashboard automatically displays a setup form to create the first admin account. This process uses a secure Postgres function (`check_admin_exists`) via RPC to query the `profiles` table safely.
 - **Authentication**: Uses `@supabase/ssr`. A root `middleware.ts` handles session refreshing.
 - **Session Synchronization**: Login and logout processes utilize hard redirects (`window.location.href`) to ensure the entire page reloads and the authentication state is correctly synchronized across the application.
 - **Client Usage**:

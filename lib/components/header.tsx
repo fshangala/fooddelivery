@@ -1,13 +1,38 @@
 'use client';
 
-import { useAuth } from "./auth_provider";
+import { useAuth, useProfile } from "./auth_provider";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import logout from "@/lib/actions/logout";
 import { usePathname } from "next/navigation";
 
+interface NavLinkProps {
+  href: string;
+  pathname: string;
+  setIsOpen: (open: boolean) => void;
+  children: React.ReactNode;
+}
+
+const NavLink = ({ href, pathname, setIsOpen, children }: NavLinkProps) => {
+  const isActive = pathname === href;
+  return (
+    <Link 
+      href={href} 
+      onClick={() => setIsOpen(false)}
+      className={`px-4 py-2 rounded-md transition cursor-pointer whitespace-nowrap w-full text-center ${
+        isActive 
+          ? "bg-primary-600 text-white" 
+          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+};
+
 export default function Header() {
   const session = useAuth();
+  const profile = useProfile();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -25,24 +50,7 @@ export default function Header() {
     };
   }, []);
 
-  const role = session?.user.user_metadata?.role;
-
-  const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => {
-    const isActive = pathname === href;
-    return (
-      <Link 
-        href={href} 
-        onClick={() => setIsOpen(false)}
-        className={`px-4 py-2 rounded-md transition cursor-pointer whitespace-nowrap w-full text-center ${
-          isActive 
-            ? "bg-primary-600 text-white" 
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-        }`}
-      >
-        {children}
-      </Link>
-    );
-  };
+  const role = profile?.role;
 
   return (
     <header className="p-4 bg-white shadow-md sticky top-0 z-50">
@@ -116,20 +124,20 @@ export default function Header() {
                 </div>
                 {role === "customer" && (
                   <>
-                    <NavLink href="/">Dashboard</NavLink>
-                    <NavLink href="/orders">My Orders</NavLink>
-                    <NavLink href="/profile">Profile</NavLink>
+                    <NavLink href="/" pathname={pathname} setIsOpen={setIsOpen}>Dashboard</NavLink>
+                    <NavLink href="/orders" pathname={pathname} setIsOpen={setIsOpen}>My Orders</NavLink>
+                    <NavLink href="/profile" pathname={pathname} setIsOpen={setIsOpen}>Profile</NavLink>
                   </>
                 )}
                 {role === "driver" && (
                   <>
-                    <NavLink href="/">Dashboard</NavLink>
-                    <NavLink href="/available">Available</NavLink>
-                    <NavLink href="/history">History</NavLink>
+                    <NavLink href="/" pathname={pathname} setIsOpen={setIsOpen}>Dashboard</NavLink>
+                    <NavLink href="/available" pathname={pathname} setIsOpen={setIsOpen}>Available</NavLink>
+                    <NavLink href="/history" pathname={pathname} setIsOpen={setIsOpen}>History</NavLink>
                   </>
                 )}
                 {role === "admin" && (
-                  <NavLink href="/admin">Admin Panel</NavLink>
+                  <NavLink href="/admin" pathname={pathname} setIsOpen={setIsOpen}>Admin Panel</NavLink>
                 )}
                 
                 <div className="w-full border-t border-gray-100 pt-2 mt-2">

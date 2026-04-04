@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { OrderService } from '@/lib/services/order_service';
 import { Order, OrderStatus } from '@/lib/definitions';
@@ -10,31 +10,31 @@ import { useRouter } from 'next/navigation';
 
 export default function OrdersPage() {
     const session = useAuth();
+    const profile = useProfile();
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
 
-    const role = session?.user?.user_metadata?.role;
+    const role = profile?.role;
 
     useEffect(() => {
-        if (session && role !== 'customer') {
+        if (session && profile && role !== 'customer') {
             router.replace('/');
         }
-    }, [session, role, router]);
+    }, [session, profile, role, router]);
 
     const fetchData = useCallback(async () => {
         if (session?.user?.id && role === 'customer') {
-            setLoading(true);
             const customerOrders = await OrderService.getByCustomerId(supabase, session.user.id);
             setOrders(customerOrders);
             setLoading(false);
         }
-    }, [session?.user?.id, role, supabase]);
+    }, [session, role, supabase]);
 
     useEffect(() => {
-        fetchData();
+        Promise.resolve().then(() => fetchData());
     }, [fetchData]);
 
     const filteredOrders = useMemo(() => {

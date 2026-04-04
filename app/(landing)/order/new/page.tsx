@@ -1,7 +1,7 @@
 'use client';
 
 import OrderForm from "@/lib/components/order_form";
-import { useAuth } from "@/lib/components/auth_provider";
+import { useAuth, useProfile } from "@/lib/components/auth_provider";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
@@ -11,6 +11,7 @@ import { Package } from "@/lib/definitions/packages";
 
 export default function NewOrderPage() {
     const session = useAuth();
+    const profile = useProfile();
     const supabase = useMemo(() => createClient(), []);
     const [packages, setPackages] = useState<Package[]>([]);
     const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ export default function NewOrderPage() {
         redirect('/login');
     }
 
-    if (session.user.user_metadata?.role !== 'customer') {
+    if (profile && profile.role !== 'customer') {
         redirect('/');
     }
 
