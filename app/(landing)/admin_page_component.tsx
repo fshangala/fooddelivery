@@ -1,18 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 
 export default function AdminPageComponent() {
     const session = useAuth();
-    const userProfile = session?.user;
+    const profile = useProfile();
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-12">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-8">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-                    <p className="text-lg text-gray-600">Welcome back, {userProfile?.user_metadata?.name || 'Administrator'}</p>
+                    <p className="text-lg text-gray-600">Welcome back, {profile?.name || 'Administrator'}</p>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

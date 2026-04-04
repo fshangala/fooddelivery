@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from "./auth_provider";
+import { useAuth, useProfile } from "./auth_provider";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import logout from "@/lib/actions/logout";
@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 
 export default function Header() {
   const session = useAuth();
+  const profile = useProfile();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -25,7 +26,7 @@ export default function Header() {
     };
   }, []);
 
-  const role = session?.user.user_metadata?.role;
+  const role = profile?.role;
 
   const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => {
     const isActive = pathname === href;

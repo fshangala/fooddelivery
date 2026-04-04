@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
 import { OrderService } from '@/lib/services/order_service';
 import { SubscriptionService, Subscription } from '@/lib/services/subscription_service';
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 import { Order } from '@/lib/definitions';
 import { createClient } from '@/lib/supabase/client';
 import { Package } from '@/lib/definitions/packages';
@@ -13,6 +13,7 @@ type SubscriptionWithPackage = Subscription & { packages: Package };
 
 export default function CustomerPageComponent() {
     const session = useAuth();
+    const profile = useProfile();
     const supabase = useMemo(() => createClient(), []);
     const [orders, setOrders] = useState<Order[]>([]);
     const [subscription, setSubscription] = useState<SubscriptionWithPackage | null>(null);
@@ -34,15 +35,13 @@ export default function CustomerPageComponent() {
         fetchData();
     }, [session?.user?.id, supabase]);
 
-    const userProfile = session?.user;
-
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-8">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-8 flex justify-between items-end">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Customer Dashboard</h1>
-                        <p className="text-gray-600">Welcome back, {userProfile?.user_metadata?.name || 'Customer'}</p>
+                        <p className="text-gray-600">Welcome back, {profile?.name || 'Customer'}</p>
                     </div>
                     <Link href="/order/new" className="inline-flex items-center px-4 py-2 bg-primary-600 text-white font-semibold rounded-md hover:bg-primary-700 transition shadow-sm">
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

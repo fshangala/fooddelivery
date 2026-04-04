@@ -2,32 +2,34 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { OrderService } from '@/lib/services/order_service';
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 import { Order } from '@/lib/definitions';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
-export default function HistoryPage() {
+export default function DeliveryHistoryPage() {
     const session = useAuth();
+    const profile = useProfile();
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
-    const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
+    const [history, setHistory] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
     const userId = session?.user?.id;
-    const role = session?.user?.user_metadata?.role;
+    const role = profile?.role;
 
     useEffect(() => {
-        if (session && role !== 'driver') {
+        if (session && profile && role !== 'driver') {
             router.replace('/');
         }
-    }, [session, role, router]);
+    }, [session, profile, role, router]);
+
 
     const fetchData = useCallback(async () => {
         if (!userId || role !== 'driver') return;
         setLoading(true);
         const completed = await OrderService.getCompletedOrdersByDriver(supabase, userId);
-        setCompletedOrders(completed);
+        setHistory(completed);
         setLoading(false);
     }, [userId, role, supabase]);
 
@@ -58,12 +60,12 @@ export default function HistoryPage() {
                     </div>
                 ) : (
                     <div>
-                        {completedOrders.length === 0 ? (
+                        {history.length === 0 ? (
                             <div className="bg-white p-8 rounded-lg shadow-sm text-center text-gray-500 border border-gray-200">
                                 <p>You haven&apos;t completed any deliveries yet.</p>
                             </div>
                         ) : (
-                            completedOrders.map(order => (
+                            history.map(order => (
                                 <div key={order.id} className="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500 mb-4 border-t border-r border-b border-gray-100">
                                     <div className="flex justify-between items-center">
                                         <div>

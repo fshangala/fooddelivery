@@ -2,26 +2,27 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { OrderService } from '@/lib/services/order_service';
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 import { Order } from '@/lib/definitions';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function AvailableOrdersPage() {
     const session = useAuth();
+    const profile = useProfile();
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
     const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
     const userId = session?.user?.id;
-    const role = session?.user?.user_metadata?.role;
+    const role = profile?.role;
 
     useEffect(() => {
-        if (session && role !== 'driver') {
+        if (session && profile && role !== 'driver') {
             router.replace('/');
         }
-    }, [session, role, router]);
+    }, [session, profile, role, router]);
 
     const fetchData = useCallback(async () => {
         if (!userId || role !== 'driver') return;

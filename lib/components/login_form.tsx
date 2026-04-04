@@ -1,10 +1,13 @@
 'use client';
 
 import { useActionState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { loginUser } from "../actions/login";
 
 export default function LoginForm() {
     const [state, action, pending] = useActionState(loginUser, {});
+    const searchParams = useSearchParams();
+    const isConfirmed = searchParams.get('email_comfirmation') === 'success';
 
     useEffect(() => {
         if (state.message === "Success") {
@@ -18,6 +21,11 @@ export default function LoginForm() {
 
     return (
         <form action={action} className="space-y-4">
+            {isConfirmed && (
+                <div className="p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm">
+                    Congratulations! Your email has been successfully confirmed. Please log in to continue.
+                </div>
+            )}
             {state.message === "Success" && (
                 <div className="p-3 bg-green-50 text-green-700 border border-green-200 rounded-md text-sm">
                     Success! Redirecting...
@@ -34,7 +42,7 @@ export default function LoginForm() {
                 {state.errors?.password && <p className="mt-1 text-sm text-red-600">{state.errors.password}</p>}
             </div>
             <div>
-                {state.message && <p className="mt-1 text-sm text-red-600">{state.message}</p>}
+                {state.message && state.message !== "Success" && <p className="mt-1 text-sm text-red-600">{state.message}</p>}
             </div>
             <button 
                 type="submit" 

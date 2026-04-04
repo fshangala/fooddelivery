@@ -1,23 +1,24 @@
 'use client';
 
-import { useAuth } from '@/lib/components/auth_provider';
+import { useAuth, useProfile } from '@/lib/components/auth_provider';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
     const session = useAuth();
+    const profile = useProfile();
     const router = useRouter();
-    const userProfile = session?.user;
-    const role = userProfile?.user_metadata?.role;
+    
+    const role = profile?.role;
 
     useEffect(() => {
-        if (session && !['customer', 'driver'].includes(role)) {
+        if (session && profile && !['customer', 'driver'].includes(role)) {
             router.replace('/');
         }
-    }, [session, role, router]);
+    }, [session, profile, role, router]);
 
-    if (!session) {
+    if (!session || !profile) {
         return (
             <div className="flex justify-center py-20">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
@@ -30,9 +31,17 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-8">
             <div className="max-w-4xl mx-auto">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-                    <p className="text-gray-600">Manage your account information</p>
+                <header className="mb-8 flex justify-between items-end">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
+                        <p className="text-gray-600">Manage your account information</p>
+                    </div>
+                    <Link 
+                        href="/profile/edit" 
+                        className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition font-medium"
+                    >
+                        Edit Profile
+                    </Link>
                 </header>
 
                 <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
@@ -43,23 +52,27 @@ export default function ProfilePage() {
                         <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                             <div className="sm:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                                <p className="mt-1 text-lg text-gray-900">{userProfile?.user_metadata?.name || 'Not provided'}</p>
+                                <p className="mt-1 text-lg text-gray-900">{profile.name || 'Not provided'}</p>
                             </div>
                             <div className="sm:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                                <p className="mt-1 text-lg text-gray-900">{userProfile?.email}</p>
+                                <p className="mt-1 text-lg text-gray-900">{profile.email}</p>
+                            </div>
+                            <div className="sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <p className="mt-1 text-lg text-gray-900">{profile.phone || 'Not provided'}</p>
                             </div>
                             <div className="sm:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700">Account Type</label>
                                 <p className="mt-1">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                                        {userProfile?.user_metadata?.role || 'customer'}
+                                        {profile.role}
                                     </span>
                                 </p>
                             </div>
                             <div className="sm:col-span-3">
-                                <label className="block text-sm font-medium text-gray-700">Member Since</label>
-                                <p className="mt-1 text-gray-900">{userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'N/A'}</p>
+                                <label className="block text-sm font-medium text-gray-700">Last Updated</label>
+                                <p className="mt-1 text-gray-900">{profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'N/A'}</p>
                             </div>
                         </div>
                     </div>
@@ -74,4 +87,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-

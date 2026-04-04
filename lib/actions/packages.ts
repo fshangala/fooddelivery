@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { PackageService } from "../services/package_service";
+import { ProfileService } from "../services/profile_service";
 import { createClient } from "../supabase/server";
 import { CreatePackageState } from "../definitions/packages";
 
@@ -45,7 +46,13 @@ export async function createPackage(formState: CreatePackageState, formData: For
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!user) {
+        return { message: "Unauthorized: Please log in." };
+    }
+
+    const profile = await ProfileService.getProfile(supabase, user.id);
+
+    if (profile?.role !== 'admin') {
         return { message: "Unauthorized: Only admins can create packages." };
     }
 
@@ -69,7 +76,13 @@ export async function updatePackage(id: string, formState: CreatePackageState, f
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!user) {
+        return { message: "Unauthorized: Please log in." };
+    }
+
+    const profile = await ProfileService.getProfile(supabase, user.id);
+
+    if (profile?.role !== 'admin') {
         return { message: "Unauthorized: Only admins can update packages." };
     }
 
@@ -93,7 +106,13 @@ export async function deletePackage(id: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user || user.user_metadata?.role !== 'admin') {
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    const profile = await ProfileService.getProfile(supabase, user.id);
+
+    if (profile?.role !== 'admin') {
         throw new Error("Unauthorized");
     }
 

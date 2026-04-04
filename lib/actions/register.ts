@@ -29,7 +29,8 @@ type RegisterFormState = {
  * Server Action to register a new user with Supabase Auth.
  * 
  * Validates 'name', 'email', 'password', and 'confirmPassword'.
- * On success, signs up the user with user_metadata containing their name and role.
+ * On success, signs up the user. A database trigger automatically creates 
+ * a record in the 'profiles' table with the provided name and role.
  * 
  * @param formState - The current state of the registration form.
  * @param formData - The form data containing registration fields.
