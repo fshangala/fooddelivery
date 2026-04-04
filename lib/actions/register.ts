@@ -79,7 +79,7 @@ export async function registerUser(formState: RegisterFormState | undefined, for
         password, 
         options: { 
             data: { name, role },
-            emailRedirectTo: `${origin}/login?email_comfirmation=success`,
+            emailRedirectTo: `${origin}/auth/callback`,
         }, 
     });
 
