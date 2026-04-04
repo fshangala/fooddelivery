@@ -79,6 +79,7 @@ export default function Header() {
                   <Link href="/" className={`font-medium ${pathname === '/' ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'}`}>Dashboard</Link>
                   <Link href="/available" className={`font-medium ${pathname === '/available' ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'}`}>Available</Link>
                   <Link href="/history" className={`font-medium ${pathname === '/history' ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'}`}>History</Link>
+                  <Link href="/profile" className={`font-medium ${pathname === '/profile' ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'}`}>Profile</Link>
                 </>
               )}
               {role === "admin" && (
@@ -135,6 +136,7 @@ export default function Header() {
                     <NavLink href="/" pathname={pathname} setIsOpen={setIsOpen}>Dashboard</NavLink>
                     <NavLink href="/available" pathname={pathname} setIsOpen={setIsOpen}>Available</NavLink>
                     <NavLink href="/history" pathname={pathname} setIsOpen={setIsOpen}>History</NavLink>
+                    <NavLink href="/profile" pathname={pathname} setIsOpen={setIsOpen}>Profile</NavLink>
                   </>
                 )}
                 {role === "admin" && (
