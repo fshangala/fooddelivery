@@ -99,7 +99,7 @@ export default function AdminSetupForm() {
             <button
                 type="submit"
                 disabled={pending}
-                className="w-full flex justify-center py-4 px-6 border border-transparent rounded-xl shadow-lg text-base font-bold text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:from-primary-300 disabled:to-primary-400 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                className="w-full flex justify-center py-4 px-6 border border-transparent rounded-xl shadow-lg text-base font-bold text-white bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:from-primary-300 disabled:to-primary-400 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
                 {pending ? (
                     <span className="flex items-center">
