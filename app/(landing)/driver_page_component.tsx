@@ -112,7 +112,7 @@ export default function DriverPageComponent() {
                             </div>
                         ) : (
                             activeOrders.map(order => (
-                                <div key={order.id} className="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-primary-500 mb-4 border border-gray-100">
+                                <div key={order.id} className="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-primary-500 mb-4 border">
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <div className="flex items-center gap-3 mb-1">

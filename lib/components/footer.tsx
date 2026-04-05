@@ -47,7 +47,9 @@ export default function Footer() {
         
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
           <p>&copy; 2026 PremiumFresh. All rights reserved.</p>
-          <div className="flex gap-4">
+          <div className="flex gap-6">
+            <Link href="/privacy-policy" className="hover:text-primary-400 transition">Privacy Policy</Link>
+            <Link href="/terms-of-use" className="hover:text-primary-400 transition">Terms of Use</Link>
             <a href="https://www.flaticon.com/free-icons/courier" title="courier icons" className="hover:text-gray-100">
               Courier icons by mia elysia - Flaticon
             </a>
