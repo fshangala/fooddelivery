@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import pkg from "../../package.json";
 
 export default function Footer() {
+  const version = pkg.version;
   return (
     <footer className="bg-gray-900 text-gray-300 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,7 +48,10 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-          <p>&copy; 2026 PremiumFresh. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <p>&copy; 2026 PremiumFresh. All rights reserved.</p>
+            <span className="text-gray-500">v{version}</span>
+          </div>
           <div className="flex gap-6">
             <Link href="/privacy-policy" className="hover:text-primary-400 transition">Privacy Policy</Link>
             <Link href="/terms-of-use" className="hover:text-primary-400 transition">Terms of Use</Link>
