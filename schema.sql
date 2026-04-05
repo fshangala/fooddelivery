@@ -131,3 +131,36 @@ CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_delivery_date ON orders(delivery_date);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_packages_is_active ON packages(is_active);
+
+-- Static Pages Table
+-- Stores markdown content for pages like Privacy Policy and Terms of Use.
+CREATE TABLE IF NOT EXISTS static_pages (
+    slug TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS on static_pages
+ALTER TABLE static_pages ENABLE ROW LEVEL SECURITY;
+
+-- Public can view static pages
+CREATE POLICY "Public can view static pages" ON static_pages
+    FOR SELECT USING (true);
+
+-- Admins can manage static pages
+CREATE POLICY "Admins can manage static pages" ON static_pages
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role = 'admin'
+        )
+    );
+
+-- Seed static pages
+INSERT INTO static_pages (slug, title, content)
+VALUES 
+    ('privacy-policy', 'Privacy Policy', '# Privacy Policy\n\nYour privacy is important to us...'),
+    ('terms-of-use', 'Terms of Use', '# Terms of Use\n\nBy using our service, you agree to...')
+ON CONFLICT (slug) DO NOTHING;
