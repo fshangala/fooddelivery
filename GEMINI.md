@@ -22,7 +22,7 @@
     -   **Order Management**: Admins monitor all orders, status, and details under `/admin/orders`.
 
 ## Tech Stack
--   **Framework**: Next.js 13+ (App Router)
+-   **Framework**: Next.js 16.1.6 (Turbopack) (App Router) Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 -   **Language**: TypeScript
 -   **Styling**: Tailwind CSS (via global styles and utility classes)
 -   **Maps**: Leaflet & React-Leaflet (with OpenStreetMap/Nominatim for geocoding)

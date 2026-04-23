@@ -30,4 +30,5 @@ export interface Order {
     status: OrderStatus;
     subscription_id?: string;
     delivery_date?: string;
+    cluster_id?: string;
 }

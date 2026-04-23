@@ -88,6 +88,16 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'COMPLETED', 'CANCELLED'))
 );
 
+-- Clusters Table
+-- Stores cluster centroids and metadata for grouping nearby orders.
+CREATE TABLE IF NOT EXISTS clusters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    centroid_lat NUMERIC(10, 7) NOT NULL,
+    centroid_lon NUMERIC(10, 7) NOT NULL,
+    order_count INTEGER DEFAULT 0
+);
+
 -- Orders Table
 -- Stores all vegetable delivery orders.
 -- Linked to customers (creators) and drivers (assignees).
@@ -104,6 +114,9 @@ CREATE TABLE IF NOT EXISTS orders (
     
     -- Driver assigned to deliver the order (nullable until accepted/assigned)
     driver_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    
+    -- Cluster Link (For smart clustering of orders)
+    cluster_id UUID REFERENCES clusters(id) ON DELETE SET NULL,
     
     -- Delivery details
     address TEXT NOT NULL,
@@ -126,6 +139,7 @@ CREATE TABLE IF NOT EXISTS orders (
 -- Indexes for common query patterns
 CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_driver_id ON orders(driver_id);
+CREATE INDEX IF NOT EXISTS idx_orders_cluster_id ON orders(cluster_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_delivery_date ON orders(delivery_date);

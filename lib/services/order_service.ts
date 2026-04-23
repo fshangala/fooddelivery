@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Order, OrderStatus } from "../definitions";
+import { ClusterService } from "./cluster_service";
 
 /**
  * Service class for managing vegetable orders in Supabase.
@@ -7,23 +8,32 @@ import { Order, OrderStatus } from "../definitions";
  */
 export class OrderService {
     /**
-     * Creates a new vegetable order in the database.
+     * Creates a new vegetable order in the database and assigns it to a smart cluster.
      * 
      * @param supabase - The Supabase client to use for the operation.
      * @param orderData - The order details excluding system-generated fields (id, created_at).
-     * @param orderData.customer_id - The UUID of the customer from auth.users.
-     * @param orderData.address - The physical delivery address.
-     * @param orderData.lat - Latitude coordinate for delivery location.
-     * @param orderData.lon - Longitude coordinate for delivery location.
-     * @param orderData.vegetables - Array of selected vegetable names.
-     * @param orderData.status - Initial status of the order (usually 'PENDING').
      * @returns The newly created order object, or null if the operation fails.
      */
     static async create(supabase: SupabaseClient, orderData: Omit<Order, 'id' | 'created_at'>): Promise<Order | null> {
+        // Find or create a cluster for the new order
+        let clusterId: string | undefined;
+        const nearestCluster = await ClusterService.findNearestCluster(supabase, orderData.lat, orderData.lon);
+
+        if (nearestCluster) {
+            clusterId = nearestCluster.id;
+            // Update cluster centroid with the new order's location
+            await ClusterService.addOrderToCluster(supabase, nearestCluster, orderData.lat, orderData.lon);
+        } else {
+            // Create a new cluster
+            const newCluster = await ClusterService.createCluster(supabase, orderData.lat, orderData.lon);
+            clusterId = newCluster?.id;
+        }
+
         const { data, error } = await supabase
             .from('orders')
             .insert([{
                 ...orderData,
+                cluster_id: clusterId,
                 // Supabase-js handles objects for JSONB columns automatically
                 vegetables: orderData.vegetables 
             }])
