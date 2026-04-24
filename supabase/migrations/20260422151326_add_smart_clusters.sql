@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS clusters (
     created_at TIMESTAMPTZ DEFAULT now(),
     centroid_lat NUMERIC(10, 7) NOT NULL,
     centroid_lon NUMERIC(10, 7) NOT NULL,
-    order_count INTEGER DEFAULT 0
+    order_count INTEGER DEFAULT 0,
+    driver_id UUID REFERENCES auth.users(id) ON DELETE SET NULL
 );
 
 -- Add cluster_id to orders table

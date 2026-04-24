@@ -1,6 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Cluster } from "../definitions";
+import { Cluster, Order } from "../definitions";
 import { getDistance } from "../utils/geo";
+
+type AvailableCluster = Cluster & {
+    pendingOrdersCount: number;
+    representativeAddress?: string;
+};
 
 /**
  * Service class for managing smart clusters.
@@ -88,9 +93,10 @@ export class ClusterService {
         orderLat: number, 
         orderLon: number
     ): Promise<boolean> {
-        const newCount = cluster.order_count + 1;
-        const newLat = ((cluster.centroid_lat * cluster.order_count) + orderLat) / newCount;
-        const newLon = ((cluster.centroid_lon * cluster.order_count) + orderLon) / newCount;
+        const currentCount = cluster.order_count || 0;
+        const newCount = currentCount + 1;
+        const newLat = ((cluster.centroid_lat * currentCount) + orderLat) / newCount;
+        const newLon = ((cluster.centroid_lon * currentCount) + orderLon) / newCount;
 
         const { error } = await supabase
             .from('clusters')
@@ -103,6 +109,103 @@ export class ClusterService {
 
         if (error) {
             console.error("Error updating cluster centroid:", error.message);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Retrieves clusters that are available for driver assignment.
+     * Only clusters without an assigned driver and with pending orders are returned.
+     */
+    static async getAvailableClusters(supabase: SupabaseClient): Promise<AvailableCluster[]> {
+        const { data: clusters, error } = await supabase
+            .from('clusters')
+            .select('*')
+            .is('driver_id', null);
+
+        if (error || !clusters) {
+            console.error("Error fetching available clusters:", error?.message);
+            return [];
+        }
+
+        const clusterIds = (clusters as Cluster[]).map((cluster) => cluster.id);
+        if (clusterIds.length === 0) {
+            return [];
+        }
+
+        const { data: pendingOrders, error: ordersError } = await supabase
+            .from('orders')
+            .select('id, cluster_id, address')
+            .in('cluster_id', clusterIds)
+            .eq('status', 'PENDING');
+
+        if (ordersError) {
+            console.error("Error fetching pending orders for clusters:", ordersError.message);
+            return [];
+        }
+
+        const ordersByCluster = new Map<string, Order[]>();
+        for (const order of (pendingOrders as Order[])) {
+            if (!order.cluster_id) continue;
+            const current = ordersByCluster.get(order.cluster_id) || [];
+            current.push(order);
+            ordersByCluster.set(order.cluster_id, current);
+        }
+
+        return (clusters as Cluster[])
+            .map((cluster) => {
+                const orders = ordersByCluster.get(cluster.id) || [];
+                return {
+                    ...cluster,
+                    pendingOrdersCount: orders.length,
+                    representativeAddress: orders[0]?.address,
+                };
+            })
+            .filter((cluster) => cluster.pendingOrdersCount > 0);
+    }
+
+    /**
+     * Retrieves clusters currently assigned to a specific driver.
+     */
+    static async getActiveClustersByDriver(supabase: SupabaseClient, driverId: string): Promise<Cluster[]> {
+        const { data, error } = await supabase
+            .from('clusters')
+            .select('*')
+            .eq('driver_id', driverId);
+
+        if (error || !data) {
+            console.error("Error fetching active clusters for driver:", error?.message);
+            return [];
+        }
+
+        return data as Cluster[];
+    }
+
+    /**
+     * Assigns a driver to a cluster and marks all pending orders in that cluster as in progress.
+     */
+    static async assignDriverToCluster(supabase: SupabaseClient, clusterId: string, driverId: string): Promise<boolean> {
+        const { error: clusterError } = await supabase
+            .from('clusters')
+            .update({ driver_id: driverId })
+            .eq('id', clusterId)
+            .is('driver_id', null);
+
+        if (clusterError) {
+            console.error("Error assigning driver to cluster:", clusterError.message);
+            return false;
+        }
+
+        const { error: ordersError } = await supabase
+            .from('orders')
+            .update({ driver_id: driverId, status: 'IN_PROGRESS' })
+            .eq('cluster_id', clusterId)
+            .eq('status', 'PENDING');
+
+        if (ordersError) {
+            console.error("Error assigning driver to cluster orders:", ordersError.message);
             return false;
         }
 

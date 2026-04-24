@@ -73,7 +73,8 @@ export default function DeliveryHistoryPage() {
                                         </div>
                                         <div className="text-right">
                                             <p className="text-sm text-gray-500">Completed on</p>
-                                            <p className="font-medium text-gray-700">{new Date(order.created_at).toLocaleDateString()}</p>
+                                            <p className="font-medium text-gray-700">{new Date(order.created_at || 0).toLocaleDateString()}</p>       
+
                                         </div>
                                     </div>
                                 </div>

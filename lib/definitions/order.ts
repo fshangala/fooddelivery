@@ -1,3 +1,5 @@
+import { Order as DbOrder } from "./supabase";
+
 export type UserRole = 'customer' | 'driver' | 'admin';
 
 export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'DELIVERED' | 'CANCELLED';
@@ -17,18 +19,7 @@ export const AVAILABLE_VEGETABLES = [
     "Cabbage"
 ];
 
-export interface Order {
-    id: string;
-    created_at: string;
-    customer_id: string; // Foreign key to auth.users.id
-    driver_id?: string; // Foreign key to auth.users.id
-    address: string;
-    delivery_instructions?: string;
-    lat: number;
-    lon: number;
+export interface Order extends Omit<DbOrder, 'vegetables' | 'status'> {
     vegetables: string[];
     status: OrderStatus;
-    subscription_id?: string;
-    delivery_date?: string;
-    cluster_id?: string;
 }

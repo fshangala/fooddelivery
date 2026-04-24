@@ -80,7 +80,7 @@ export default async function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900 truncate max-w-xs">{order.address}</span>
-                        <span className="text-xs text-gray-500">{new Date(order.created_at).toLocaleString()}</span>
+                        <span className="text-xs text-gray-500">{new Date(order.created_at || 0).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-3">
                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${

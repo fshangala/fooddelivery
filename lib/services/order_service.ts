@@ -14,18 +14,20 @@ export class OrderService {
      * @param orderData - The order details excluding system-generated fields (id, created_at).
      * @returns The newly created order object, or null if the operation fails.
      */
-    static async create(supabase: SupabaseClient, orderData: Omit<Order, 'id' | 'created_at'>): Promise<Order | null> {
+    static async create(supabase: SupabaseClient, orderData: Partial<Order>): Promise<Order | null> {
         // Find or create a cluster for the new order
         let clusterId: string | undefined;
-        const nearestCluster = await ClusterService.findNearestCluster(supabase, orderData.lat, orderData.lon);
+        const lat = orderData.lat || 0;
+        const lon = orderData.lon || 0;
+        const nearestCluster = await ClusterService.findNearestCluster(supabase, lat, lon);
 
         if (nearestCluster) {
             clusterId = nearestCluster.id;
             // Update cluster centroid with the new order's location
-            await ClusterService.addOrderToCluster(supabase, nearestCluster, orderData.lat, orderData.lon);
+            await ClusterService.addOrderToCluster(supabase, nearestCluster, lat, lon);
         } else {
             // Create a new cluster
-            const newCluster = await ClusterService.createCluster(supabase, orderData.lat, orderData.lon);
+            const newCluster = await ClusterService.createCluster(supabase, lat, lon);
             clusterId = newCluster?.id;
         }
 

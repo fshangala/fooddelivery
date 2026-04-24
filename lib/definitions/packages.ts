@@ -1,11 +1,7 @@
-export interface Package {
-    id: string;
-    created_at: string;
-    name: string;
-    image_url?: string;
-    price?: number;
+import { Package as DbPackage } from "./supabase";
+
+export interface Package extends Omit<DbPackage, 'vegetables'> {
     vegetables: string[];
-    is_active: boolean;
 }
 
 export type CreatePackageState = {

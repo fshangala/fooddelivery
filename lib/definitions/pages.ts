@@ -1,8 +1,6 @@
-export interface StaticPage {
-    slug: string;
-    title: string;
-    content: string;
-    updated_at: string;
+import { StaticPage as DbStaticPage } from "./supabase";
+
+export interface StaticPage extends DbStaticPage {
 }
 
 export type PageActionState = {

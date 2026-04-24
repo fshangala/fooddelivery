@@ -2,6 +2,7 @@
 
 ## Operational Mandates
 - **Environment Awareness**: At the start of every session, always check the operating system and shell (e.g., `win32` with `powershell`). Ensure all shell commands (`run_shell_command`) are compatible with the current environment. Do not assume Linux/bash defaults if running on Windows.
+- **Testing Policy**: This project **does not use automated tests**. Verification is performed through manual testing, linting (`npm run lint`), and build checks (`npm run build`). Do not create or run automated test files.
 
 ## Overview
 **PremiumFresh** is a subscription-based information system for weekly vegetable deliveries. It connects Customers, Drivers, and Administrators through a unified platform built with Next.js and Supabase.

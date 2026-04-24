@@ -1,10 +1,6 @@
 import { UserRole } from "./order";
+import { Profile as DbProfile } from "./supabase";
 
-export interface Profile {
-    id: string;
-    updated_at: string;
-    name: string | null;
+export interface Profile extends DbProfile {
     role: UserRole;
-    email: string | null;
-    phone: string | null;
 }

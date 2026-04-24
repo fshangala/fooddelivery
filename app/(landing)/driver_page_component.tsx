@@ -123,11 +123,11 @@ export default function DriverPageComponent() {
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Assigned At</p>
-                                            <p className="text-sm font-bold text-gray-700">{new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                            <p className="text-sm font-bold text-gray-700">{new Date(order.created_at || 0).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
-                                        <button onClick={() => handleNavigate(order.lat, order.lon)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-bold transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                                        <button onClick={() => handleNavigate(order.lat || 0, order.lon || 0)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-bold transition shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                             Navigate
                                         </button>

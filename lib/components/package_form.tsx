@@ -128,7 +128,8 @@ export default function PackageForm({ pkg, onCancel }: PackageFormProps) {
                         id="is_active" 
                         name="is_active" 
                         type="checkbox" 
-                        defaultChecked={pkg ? pkg.is_active : true} 
+                        defaultChecked={pkg ? (pkg.is_active ?? true) : true}
+ 
                         className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" 
                     />
                 </div>
