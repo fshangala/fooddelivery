@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 type AvailableCluster = Cluster & {
     pendingOrdersCount: number;
     representativeAddress?: string;
+    isPreferred?: boolean;
+    distanceFromHome?: number;
 };
 
 export default function AvailableOrdersPage() {
@@ -31,16 +33,16 @@ export default function AvailableOrdersPage() {
 
     const fetchData = useCallback(async () => {
         if (!userId || role !== 'driver') return;
-        const clusters = await ClusterService.getAvailableClusters(supabase);
+        const clusters = await ClusterService.getAvailableClusters(supabase, profile);
         setAvailableClusters(clusters);
         setLoading(false);
-    }, [userId, role, supabase]);
+    }, [userId, role, supabase, profile]);
 
     useEffect(() => {
-        if (userId && role === 'driver') {
+        if (userId && role === 'driver' && profile) {
             Promise.resolve().then(() => fetchData());
         }
-    }, [fetchData, userId, role]);
+    }, [fetchData, userId, role, profile]);
 
     const handleAcceptCluster = async (clusterId: string) => {
         if (!session?.user?.id) return;
@@ -86,13 +88,26 @@ export default function AvailableOrdersPage() {
                             </div>
                         ) : (
                             availableClusters.map(cluster => (
-                                <div key={cluster.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition mb-4 border border-gray-100">
+                                <div key={cluster.id} className={`bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition mb-4 border-2 ${cluster.isPreferred ? 'border-primary-500 bg-primary-50/10' : 'border-gray-100'}`}>
                                     <div className="flex justify-between items-center mb-3">
-                                        <span className="text-sm text-gray-500">Delivery Date: {cluster.delivery_date ? new Date(cluster.delivery_date).toLocaleDateString() : 'N/A'}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-gray-500">Delivery Date: {cluster.delivery_date ? new Date(cluster.delivery_date).toLocaleDateString() : 'N/A'}</span>
+                                            {cluster.isPreferred && (
+                                                <span className="px-2 py-0.5 bg-primary-600 text-white text-[10px] font-bold rounded uppercase tracking-wider">Preferred</span>
+                                            )}
+                                        </div>
                                         <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">{cluster.pendingOrdersCount} orders</span>
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900 mb-2">{cluster.representativeAddress ?? 'Cluster delivery area'}</h3>
-                                    <p className="text-sm text-gray-500 mb-4">Centroid: {cluster.centroid_lat.toFixed(5)}, {cluster.centroid_lon.toFixed(5)}</p>
+                                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                                        <p>Centroid: {cluster.centroid_lat.toFixed(5)}, {cluster.centroid_lon.toFixed(5)}</p>
+                                        {cluster.distanceFromHome !== undefined && (
+                                            <p className="flex items-center gap-1 font-medium text-primary-700">
+                                                <span>🏠</span>
+                                                {cluster.distanceFromHome.toFixed(1)} km away
+                                            </p>
+                                        )}
+                                    </div>
                                     <div className="flex flex-col sm:flex-row gap-3">
                                         <button onClick={() => handleAcceptCluster(cluster.id)} className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-lg font-medium transition">Accept Cluster</button>
                                         <button onClick={() => handleNavigate(cluster.centroid_lat, cluster.centroid_lon)} className="flex-1 border border-primary-600 text-primary-600 py-3 rounded-lg font-medium transition hover:bg-primary-50">Navigate to Cluster</button>

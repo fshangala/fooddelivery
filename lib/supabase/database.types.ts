@@ -39,6 +39,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       clusters: {
         Row: {
           centroid_lat: number
@@ -48,6 +72,7 @@ export type Database = {
           driver_id: string | null
           id: string
           order_count: number | null
+          status: string
         }
         Insert: {
           centroid_lat: number
@@ -57,6 +82,7 @@ export type Database = {
           driver_id?: string | null
           id?: string
           order_count?: number | null
+          status?: string
         }
         Update: {
           centroid_lat?: number
@@ -66,6 +92,7 @@ export type Database = {
           driver_id?: string | null
           id?: string
           order_count?: number | null
+          status?: string
         }
         Relationships: []
       }
@@ -171,6 +198,9 @@ export type Database = {
           id: string
           name: string | null
           phone: string | null
+          preferred_lat: number | null
+          preferred_lon: number | null
+          preferred_radius_km: number | null
           role: string
           updated_at: string | null
         }
@@ -179,6 +209,9 @@ export type Database = {
           id: string
           name?: string | null
           phone?: string | null
+          preferred_lat?: number | null
+          preferred_lon?: number | null
+          preferred_radius_km?: number | null
           role?: string
           updated_at?: string | null
         }
@@ -187,6 +220,9 @@ export type Database = {
           id?: string
           name?: string | null
           phone?: string | null
+          preferred_lat?: number | null
+          preferred_lon?: number | null
+          preferred_radius_km?: number | null
           role?: string
           updated_at?: string | null
         }

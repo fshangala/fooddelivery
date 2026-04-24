@@ -8,8 +8,10 @@
 
 - **Customer Portal**: Users can manage their monthly vegetable subscriptions through a dedicated dashboard. Separate pages are available for **Order History** and **Profile Settings**. Includes a **Map-based Location Picker** with address search for precise delivery coordinates.
 - **Driver Dashboard**: A streamlined interface for drivers to manage their workflow across dedicated pages:
+  - **Smart Clustering**: Orders are automatically grouped into date-specific clusters. Drivers accept entire clusters for more efficient routing.
+  - **Home Zones**: Drivers can set a preferred delivery area and radius in their profile to prioritize clusters near them.
   - **Dashboard**: A summary view of the driver's profile and active deliveries.
-  - **Available**: A real-time queue of all pending orders ready for pickup.
+  - **Available**: A real-time queue of all pending clusters ready for pickup.
   - **History**: A record of all completed deliveries.
   - Each active delivery includes a **Navigate** button that opens Google Maps for routing.
 - **Admin Area**: Administrators can view orders and monitor activity through a secure section of the app.

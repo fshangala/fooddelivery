@@ -27,7 +27,9 @@
 -   **Language**: TypeScript
 -   **Styling**: Tailwind CSS (via global styles and utility classes)
 -   **Maps**: Leaflet & React-Leaflet (with OpenStreetMap/Nominatim for geocoding)
+-   **Smart Clustering**: Automated grouping of orders based on geographic proximity and delivery date. Supports configurable radius and capacity limits.
 -   **Database & Auth**: Supabase with `@supabase/ssr` for robust session handling.
+-   **Site Configuration**: Centralized `app_settings` table for managing application behavior (e.g., cluster radius, max orders).
 -   **Deployment**: Vercel-ready
 
 ## Key Directories

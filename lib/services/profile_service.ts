@@ -38,14 +38,24 @@ export class ProfileService {
      * @param data - The profile data to update (name and phone only).
      * @returns A promise that resolves to the updated profile or null if the operation failed.
      */
-    static async updateProfile(supabase: SupabaseClient, userId: string, data: { name?: string, phone?: string }): Promise<Profile | null> {
+    static async updateProfile(supabase: SupabaseClient, userId: string, data: Partial<Profile>): Promise<Profile | null> {
         try {
-            // Ensure we are only updating name and phone
-            const updateData: { name?: string, phone?: string, updated_at: string } = {
+            // Ensure we are only updating allowed fields
+            const updateData: {
+                name?: string | null;
+                phone?: string | null;
+                preferred_lat?: number | null;
+                preferred_lon?: number | null;
+                preferred_radius_km?: number | null;
+                updated_at: string;
+            } = {
                 updated_at: new Date().toISOString()
             };
             if (data.name !== undefined) updateData.name = data.name;
             if (data.phone !== undefined) updateData.phone = data.phone;
+            if (data.preferred_lat !== undefined) updateData.preferred_lat = data.preferred_lat;
+            if (data.preferred_lon !== undefined) updateData.preferred_lon = data.preferred_lon;
+            if (data.preferred_radius_km !== undefined) updateData.preferred_radius_km = data.preferred_radius_km;
 
             const { data: updatedProfile, error } = await supabase
                 .from('profiles')

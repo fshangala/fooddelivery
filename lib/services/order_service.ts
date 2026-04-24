@@ -122,6 +122,9 @@ export class OrderService {
      * @returns A promise that resolves to true if the update was successful, or false if it failed.
      */
     static async updateStatus(supabase: SupabaseClient, id: string, status: OrderStatus): Promise<boolean> {
+        // 1. Get the order to find its cluster_id
+        const order = await this.getById(supabase, id);
+        
         const { error } = await supabase
             .from('orders')
             .update({ status })
@@ -130,6 +133,11 @@ export class OrderService {
         if (error) {
             console.error("Error updating order status:", error.message);
             return false;
+        }
+
+        // 2. If it was part of a cluster, check if the cluster is now complete
+        if (order?.cluster_id) {
+            await ClusterService.checkAndCompleteCluster(supabase, order.cluster_id);
         }
 
         return true;

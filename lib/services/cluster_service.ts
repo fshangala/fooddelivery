@@ -1,10 +1,13 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Cluster, Order } from "../definitions";
+import { Cluster, Order, Profile } from "../definitions";
 import { getDistance } from "../utils/geo";
+import { SettingsService } from "./settings_service";
 
 type AvailableCluster = Cluster & {
     pendingOrdersCount: number;
     representativeAddress?: string;
+    isPreferred?: boolean;
+    distanceFromHome?: number;
 };
 
 /**
@@ -14,17 +17,13 @@ type AvailableCluster = Cluster & {
 export class ClusterService {
     /**
      * Threshold distance in kilometers for adding an order to a cluster's centroid.
+     * @deprecated Use SettingsService.getClusterRadius()
      */
     private static readonly CLUSTER_RADIUS_KM = 0.5;
 
     /**
-     * Finds the nearest cluster whose centroid is within 0.5km of the given location and on the same delivery date.
-     * 
-     * @param supabase - The Supabase client.
-     * @param lat - Latitude of the new order.
-     * @param lon - Longitude of the new order.
-     * @param deliveryDate - The delivery date of the order.
-     * @returns The nearest cluster within range, or null if none found.
+     * Finds the nearest cluster whose centroid is within range of the given location and on the same delivery date.
+     * Only considers OPEN clusters with capacity.
      */
     static async findNearestCluster(
         supabase: SupabaseClient, 
@@ -32,11 +31,18 @@ export class ClusterService {
         lon: number,
         deliveryDate: string
     ): Promise<Cluster | null> {
-        // Fetch all clusters for the given date.
+        // Fetch radius and max orders from settings
+        const [radius, maxOrders] = await Promise.all([
+            SettingsService.getClusterRadius(supabase),
+            SettingsService.getMaxOrdersPerCluster(supabase)
+        ]);
+
+        // Fetch all OPEN clusters for the given date.
         const { data: clusters, error } = await supabase
             .from('clusters')
             .select('*')
-            .eq('delivery_date', deliveryDate);
+            .eq('delivery_date', deliveryDate)
+            .eq('status', 'OPEN');
 
         if (error || !clusters) {
             console.error("Error fetching clusters:", error?.message);
@@ -44,9 +50,12 @@ export class ClusterService {
         }
 
         let nearestCluster: Cluster | null = null;
-        let minDistance = this.CLUSTER_RADIUS_KM;
+        let minDistance = radius;
 
         for (const cluster of (clusters as Cluster[])) {
+            // Check capacity
+            if ((cluster.order_count || 0) >= maxOrders) continue;
+
             const distance = getDistance(lat, lon, cluster.centroid_lat, cluster.centroid_lon);
             if (distance <= minDistance) {
                 minDistance = distance;
@@ -59,12 +68,6 @@ export class ClusterService {
 
     /**
      * Creates a new cluster with the given coordinates as the initial centroid.
-     * 
-     * @param supabase - The Supabase client.
-     * @param lat - Initial latitude.
-     * @param lon - Initial longitude.
-     * @param deliveryDate - The delivery date for this cluster.
-     * @returns The newly created cluster.
      */
     static async createCluster(
         supabase: SupabaseClient, 
@@ -78,7 +81,8 @@ export class ClusterService {
                 centroid_lat: lat,
                 centroid_lon: lon,
                 order_count: 1,
-                delivery_date: deliveryDate
+                delivery_date: deliveryDate,
+                status: 'OPEN'
             }])
             .select()
             .single();
@@ -104,7 +108,6 @@ export class ClusterService {
         if (existing) {
             const success = await this.addOrderToCluster(supabase, existing, lat, lon);
             if (success) {
-                // Return updated cluster (simplified, ideally re-fetch or calculate)
                 return {
                     ...existing,
                     order_count: (existing.order_count || 0) + 1
@@ -119,12 +122,6 @@ export class ClusterService {
     /**
      * Updates a cluster's centroid by incorporating a new order's location.
      * Uses the moving average formula to recalculate the centroid.
-     * 
-     * @param supabase - The Supabase client.
-     * @param cluster - The cluster to update.
-     * @param orderLat - Latitude of the new order.
-     * @param orderLon - Longitude of the new order.
-     * @returns True if successful, false otherwise.
      */
     static async addOrderToCluster(
         supabase: SupabaseClient, 
@@ -155,13 +152,40 @@ export class ClusterService {
     }
 
     /**
-     * Retrieves clusters that are available for driver assignment.
-     * Only clusters without an assigned driver and with pending orders are returned.
+     * Updates a cluster's status to COMPLETED if all orders are finished.
      */
-    static async getAvailableClusters(supabase: SupabaseClient): Promise<AvailableCluster[]> {
+    static async checkAndCompleteCluster(supabase: SupabaseClient, clusterId: string): Promise<boolean> {
+        const { data: orders, error } = await supabase
+            .from('orders')
+            .select('status')
+            .eq('cluster_id', clusterId);
+
+        if (error || !orders) return false;
+
+        // If all orders are DELIVERED or CANCELLED
+        const allFinished = orders.every(o => ['DELIVERED', 'CANCELLED'].includes(o.status));
+
+        if (allFinished && orders.length > 0) {
+            const { error: updateError } = await supabase
+                .from('clusters')
+                .update({ status: 'COMPLETED' })
+                .eq('id', clusterId);
+            
+            return !updateError;
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieves clusters that are available for driver assignment.
+     * Prioritizes clusters based on driver home zone if provided.
+     */
+    static async getAvailableClusters(supabase: SupabaseClient, driverProfile?: Profile | null): Promise<AvailableCluster[]> {
         const { data: clusters, error } = await supabase
             .from('clusters')
             .select('*')
+            .eq('status', 'OPEN')
             .is('driver_id', null);
 
         if (error || !clusters) {
@@ -193,33 +217,43 @@ export class ClusterService {
             ordersByCluster.set(order.cluster_id, current);
         }
 
-        return (clusters as Cluster[])
+        const results = (clusters as Cluster[])
             .map((cluster) => {
                 const orders = ordersByCluster.get(cluster.id) || [];
+                let isPreferred = false;
+                let distanceFromHome = undefined;
+
+                if (driverProfile?.preferred_lat && driverProfile?.preferred_lon) {
+                    distanceFromHome = getDistance(
+                        driverProfile.preferred_lat, 
+                        driverProfile.preferred_lon, 
+                        cluster.centroid_lat, 
+                        cluster.centroid_lon
+                    );
+                    isPreferred = distanceFromHome <= (driverProfile.preferred_radius_km || 5.0);
+                }
+
                 return {
                     ...cluster,
                     pendingOrdersCount: orders.length,
                     representativeAddress: orders[0]?.address,
+                    isPreferred,
+                    distanceFromHome
                 };
             })
             .filter((cluster) => cluster.pendingOrdersCount > 0);
-    }
 
-    /**
-     * Retrieves clusters currently assigned to a specific driver.
-     */
-    static async getActiveClustersByDriver(supabase: SupabaseClient, driverId: string): Promise<Cluster[]> {
-        const { data, error } = await supabase
-            .from('clusters')
-            .select('*')
-            .eq('driver_id', driverId);
+        // Sort: Preferred first, then by distance (if available)
+        results.sort((a, b) => {
+            if (a.isPreferred && !b.isPreferred) return -1;
+            if (!a.isPreferred && b.isPreferred) return 1;
+            if (a.distanceFromHome !== undefined && b.distanceFromHome !== undefined) {
+                return a.distanceFromHome - b.distanceFromHome;
+            }
+            return 0;
+        });
 
-        if (error || !data) {
-            console.error("Error fetching active clusters for driver:", error?.message);
-            return [];
-        }
-
-        return data as Cluster[];
+        return results;
     }
 
     /**
@@ -228,8 +262,12 @@ export class ClusterService {
     static async assignDriverToCluster(supabase: SupabaseClient, clusterId: string, driverId: string): Promise<boolean> {
         const { error: clusterError } = await supabase
             .from('clusters')
-            .update({ driver_id: driverId })
+            .update({ 
+                driver_id: driverId,
+                status: 'ASSIGNED'
+            })
             .eq('id', clusterId)
+            .eq('status', 'OPEN')
             .is('driver_id', null);
 
         if (clusterError) {
@@ -249,5 +287,22 @@ export class ClusterService {
         }
 
         return true;
+    }
+
+    /**
+     * Retrieves clusters currently assigned to a specific driver.
+     */
+    static async getActiveClustersByDriver(supabase: SupabaseClient, driverId: string): Promise<Cluster[]> {
+        const { data, error } = await supabase
+            .from('clusters')
+            .select('*')
+            .eq('driver_id', driverId);
+
+        if (error || !data) {
+            console.error("Error fetching active clusters for driver:", error?.message);
+            return [];
+        }
+
+        return data as Cluster[];
     }
 }
