@@ -96,7 +96,8 @@ CREATE TABLE IF NOT EXISTS clusters (
     centroid_lat NUMERIC(10, 7) NOT NULL,
     centroid_lon NUMERIC(10, 7) NOT NULL,
     order_count INTEGER DEFAULT 0,
-    driver_id UUID REFERENCES auth.users(id) ON DELETE SET NULL
+    driver_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    delivery_date DATE NOT NULL
 );
 
 -- Orders Table

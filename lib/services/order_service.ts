@@ -16,26 +16,23 @@ export class OrderService {
      */
     static async create(supabase: SupabaseClient, orderData: Partial<Order>): Promise<Order | null> {
         // Find or create a cluster for the new order
-        let clusterId: string | undefined;
         const lat = orderData.lat || 0;
         const lon = orderData.lon || 0;
-        const nearestCluster = await ClusterService.findNearestCluster(supabase, lat, lon);
-
-        if (nearestCluster) {
-            clusterId = nearestCluster.id;
-            // Update cluster centroid with the new order's location
-            await ClusterService.addOrderToCluster(supabase, nearestCluster, lat, lon);
-        } else {
-            // Create a new cluster
-            const newCluster = await ClusterService.createCluster(supabase, lat, lon);
-            clusterId = newCluster?.id;
-        }
+        const deliveryDate = orderData.delivery_date || new Date().toISOString().split('T')[0];
+        
+        const cluster = await ClusterService.getOrCreateCluster(
+            supabase, 
+            lat, 
+            lon, 
+            deliveryDate
+        );
 
         const { data, error } = await supabase
             .from('orders')
             .insert([{
                 ...orderData,
-                cluster_id: clusterId,
+                delivery_date: deliveryDate,
+                cluster_id: cluster?.id || null,
                 // Supabase-js handles objects for JSONB columns automatically
                 vegetables: orderData.vegetables 
             }])

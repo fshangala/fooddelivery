@@ -88,7 +88,7 @@ export default function AvailableOrdersPage() {
                             availableClusters.map(cluster => (
                                 <div key={cluster.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition mb-4 border border-gray-100">
                                     <div className="flex justify-between items-center mb-3">
-                                        <span className="text-sm text-gray-500">Cluster center</span>
+                                        <span className="text-sm text-gray-500">Delivery Date: {cluster.delivery_date ? new Date(cluster.delivery_date).toLocaleDateString() : 'N/A'}</span>
                                         <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">{cluster.pendingOrdersCount} orders</span>
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900 mb-2">{cluster.representativeAddress ?? 'Cluster delivery area'}</h3>

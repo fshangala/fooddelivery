@@ -104,7 +104,8 @@ export default function OrdersPage() {
                                                 </span>
                                             </div>
                                             <p className="font-medium text-gray-900">{order.address}</p>
-                                            <p className="text-sm text-gray-500">{new Date(order.created_at || 0).toLocaleString()}</p>
+                                            <p className="text-sm text-gray-600 font-medium">Scheduled for: {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'N/A'}</p>
+                                            <p className="text-xs text-gray-400">Placed on: {new Date(order.created_at || 0).toLocaleString()}</p>
                                         </div>
                                         <div className="flex flex-wrap gap-2 h-fit sm:justify-end">
                                             {order.vegetables.map((veg, i) => (

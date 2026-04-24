@@ -72,9 +72,8 @@ export default function DeliveryHistoryPage() {
                                             <p className="text-sm text-gray-600">{order.address}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm text-gray-500">Completed on</p>
-                                            <p className="font-medium text-gray-700">{new Date(order.created_at || 0).toLocaleDateString()}</p>       
-
+                                            <p className="text-sm text-gray-500">Delivered on</p>
+                                            <p className="font-medium text-gray-700">{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'N/A'}</p>       
                                         </div>
                                     </div>
                                 </div>

@@ -1,7 +1,9 @@
 import { StaticPage as DbStaticPage } from "./supabase";
 
-export interface StaticPage extends DbStaticPage {
-}
+/**
+ * Type representing a static content page.
+ */
+export type StaticPage = DbStaticPage;
 
 export type PageActionState = {
     errors?: {

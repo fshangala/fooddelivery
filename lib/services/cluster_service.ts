@@ -18,18 +18,25 @@ export class ClusterService {
     private static readonly CLUSTER_RADIUS_KM = 0.5;
 
     /**
-     * Finds the nearest cluster whose centroid is within 0.5km of the given location.
+     * Finds the nearest cluster whose centroid is within 0.5km of the given location and on the same delivery date.
      * 
      * @param supabase - The Supabase client.
      * @param lat - Latitude of the new order.
      * @param lon - Longitude of the new order.
+     * @param deliveryDate - The delivery date of the order.
      * @returns The nearest cluster within range, or null if none found.
      */
-    static async findNearestCluster(supabase: SupabaseClient, lat: number, lon: number): Promise<Cluster | null> {
-        // Fetch all clusters. For large datasets, this should be optimized with a spatial query.
+    static async findNearestCluster(
+        supabase: SupabaseClient, 
+        lat: number, 
+        lon: number,
+        deliveryDate: string
+    ): Promise<Cluster | null> {
+        // Fetch all clusters for the given date.
         const { data: clusters, error } = await supabase
             .from('clusters')
-            .select('*');
+            .select('*')
+            .eq('delivery_date', deliveryDate);
 
         if (error || !clusters) {
             console.error("Error fetching clusters:", error?.message);
@@ -56,15 +63,22 @@ export class ClusterService {
      * @param supabase - The Supabase client.
      * @param lat - Initial latitude.
      * @param lon - Initial longitude.
+     * @param deliveryDate - The delivery date for this cluster.
      * @returns The newly created cluster.
      */
-    static async createCluster(supabase: SupabaseClient, lat: number, lon: number): Promise<Cluster | null> {
+    static async createCluster(
+        supabase: SupabaseClient, 
+        lat: number, 
+        lon: number,
+        deliveryDate: string
+    ): Promise<Cluster | null> {
         const { data, error } = await supabase
             .from('clusters')
             .insert([{
                 centroid_lat: lat,
                 centroid_lon: lon,
-                order_count: 1
+                order_count: 1,
+                delivery_date: deliveryDate
             }])
             .select()
             .single();
@@ -75,6 +89,31 @@ export class ClusterService {
         }
 
         return data as Cluster;
+    }
+
+    /**
+     * Finds an existing cluster within range or creates a new one.
+     */
+    static async getOrCreateCluster(
+        supabase: SupabaseClient,
+        lat: number,
+        lon: number,
+        deliveryDate: string
+    ): Promise<Cluster | null> {
+        const existing = await this.findNearestCluster(supabase, lat, lon, deliveryDate);
+        if (existing) {
+            const success = await this.addOrderToCluster(supabase, existing, lat, lon);
+            if (success) {
+                // Return updated cluster (simplified, ideally re-fetch or calculate)
+                return {
+                    ...existing,
+                    order_count: (existing.order_count || 0) + 1
+                };
+            }
+            return existing;
+        }
+
+        return this.createCluster(supabase, lat, lon, deliveryDate);
     }
 
     /**
