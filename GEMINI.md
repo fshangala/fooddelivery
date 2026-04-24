@@ -2,6 +2,7 @@
 
 ## Operational Mandates
 - **Environment Awareness**: At the start of every session, always check the operating system and shell (e.g., `win32` with `powershell`). Ensure all shell commands (`run_shell_command`) are compatible with the current environment. Do not assume Linux/bash defaults if running on Windows.
+- **Testing Policy**: This project **does not use automated tests**. Verification is performed through manual testing, linting (`npm run lint`), and build checks (`npm run build`). Do not create or run automated test files.
 
 ## Overview
 **PremiumFresh** is a subscription-based information system for weekly vegetable deliveries. It connects Customers, Drivers, and Administrators through a unified platform built with Next.js and Supabase.
@@ -22,11 +23,13 @@
     -   **Order Management**: Admins monitor all orders, status, and details under `/admin/orders`.
 
 ## Tech Stack
--   **Framework**: Next.js 13+ (App Router)
+-   **Framework**: Next.js 16.1.6 (Turbopack) (App Router) Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 -   **Language**: TypeScript
 -   **Styling**: Tailwind CSS (via global styles and utility classes)
 -   **Maps**: Leaflet & React-Leaflet (with OpenStreetMap/Nominatim for geocoding)
+-   **Smart Clustering**: Automated grouping of orders based on geographic proximity and delivery date. Supports configurable radius and capacity limits.
 -   **Database & Auth**: Supabase with `@supabase/ssr` for robust session handling.
+-   **Site Configuration**: Centralized `app_settings` table for managing application behavior (e.g., cluster radius, max orders).
 -   **Deployment**: Vercel-ready
 
 ## Key Directories

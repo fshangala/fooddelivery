@@ -1,9 +1,9 @@
-export interface StaticPage {
-    slug: string;
-    title: string;
-    content: string;
-    updated_at: string;
-}
+import { StaticPage as DbStaticPage } from "./supabase";
+
+/**
+ * Type representing a static content page.
+ */
+export type StaticPage = DbStaticPage;
 
 export type PageActionState = {
     errors?: {

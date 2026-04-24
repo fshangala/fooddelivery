@@ -33,6 +33,7 @@ export default async function AdminOrdersPage() {
                                     {order.status}
                                 </span>
                             </div>
+                            <p className="text-gray-700 mb-1 text-sm"><strong>Delivery Date:</strong> {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'N/A'}</p>
                             <p className="text-gray-700 mb-1 text-sm"><strong>Customer ID:</strong> {order.customer_id.slice(0, 8)}...</p>
                             <p className="text-gray-700 mb-1 text-sm"><strong>Address:</strong> {order.address}</p>
                             <p className="text-gray-700 mb-1 text-sm"><strong>Location:</strong> {order.lat?.toFixed(4)}, {order.lon?.toFixed(4)}</p>

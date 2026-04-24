@@ -127,7 +127,8 @@ export default function CustomerPageComponent() {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-sm font-mono text-gray-400">#{order.id.slice(0, 8)}</p>
-                                                <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                                                <p className="text-xs text-gray-500">{new Date(order.created_at || 0).toLocaleDateString()}</p>      
+
                                             </div>
                                         </div>
                                     </div>

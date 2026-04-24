@@ -57,24 +57,35 @@ export class SubscriptionService {
         const day = d.getDay();
         
         const daysUntilMonday = (1 + 7 - day) % 7;
-        // If today is Monday (day=1), daysUntilMonday = 0. Great.
         
         const nextMonday = new Date(d);
         nextMonday.setDate(d.getDate() + daysUntilMonday);
 
+        const { ClusterService } = await import("./cluster_service");
+
         for (let i = 0; i < 4; i++) {
-            const deliveryDate = new Date(nextMonday);
-            deliveryDate.setDate(nextMonday.getDate() + (i * 7));
+            const deliveryDateObj = new Date(nextMonday);
+            deliveryDateObj.setDate(nextMonday.getDate() + (i * 7));
+            const deliveryDateStr = deliveryDateObj.toISOString().split('T')[0];
             
+            // Automated Cluster Assignment
+            const cluster = await ClusterService.getOrCreateCluster(
+                supabase,
+                lat,
+                lon,
+                deliveryDateStr
+            );
+
             orders.push({
                 customer_id: userId,
                 subscription_id: subscriptionId,
+                cluster_id: cluster?.id || null,
                 address,
                 lat,
                 lon,
-                vegetables: pkg.vegetables, // Copy from package
+                vegetables: pkg.vegetables,
                 status: 'PENDING',
-                delivery_date: deliveryDate.toISOString().split('T')[0]
+                delivery_date: deliveryDateStr
             });
         }
 

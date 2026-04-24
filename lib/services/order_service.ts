@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Order, OrderStatus } from "../definitions";
+import { ClusterService } from "./cluster_service";
 
 /**
  * Service class for managing vegetable orders in Supabase.
@@ -7,23 +8,31 @@ import { Order, OrderStatus } from "../definitions";
  */
 export class OrderService {
     /**
-     * Creates a new vegetable order in the database.
+     * Creates a new vegetable order in the database and assigns it to a smart cluster.
      * 
      * @param supabase - The Supabase client to use for the operation.
      * @param orderData - The order details excluding system-generated fields (id, created_at).
-     * @param orderData.customer_id - The UUID of the customer from auth.users.
-     * @param orderData.address - The physical delivery address.
-     * @param orderData.lat - Latitude coordinate for delivery location.
-     * @param orderData.lon - Longitude coordinate for delivery location.
-     * @param orderData.vegetables - Array of selected vegetable names.
-     * @param orderData.status - Initial status of the order (usually 'PENDING').
      * @returns The newly created order object, or null if the operation fails.
      */
-    static async create(supabase: SupabaseClient, orderData: Omit<Order, 'id' | 'created_at'>): Promise<Order | null> {
+    static async create(supabase: SupabaseClient, orderData: Partial<Order>): Promise<Order | null> {
+        // Find or create a cluster for the new order
+        const lat = orderData.lat || 0;
+        const lon = orderData.lon || 0;
+        const deliveryDate = orderData.delivery_date || new Date().toISOString().split('T')[0];
+        
+        const cluster = await ClusterService.getOrCreateCluster(
+            supabase, 
+            lat, 
+            lon, 
+            deliveryDate
+        );
+
         const { data, error } = await supabase
             .from('orders')
             .insert([{
                 ...orderData,
+                delivery_date: deliveryDate,
+                cluster_id: cluster?.id || null,
                 // Supabase-js handles objects for JSONB columns automatically
                 vegetables: orderData.vegetables 
             }])
@@ -113,6 +122,9 @@ export class OrderService {
      * @returns A promise that resolves to true if the update was successful, or false if it failed.
      */
     static async updateStatus(supabase: SupabaseClient, id: string, status: OrderStatus): Promise<boolean> {
+        // 1. Get the order to find its cluster_id
+        const order = await this.getById(supabase, id);
+        
         const { error } = await supabase
             .from('orders')
             .update({ status })
@@ -121,6 +133,11 @@ export class OrderService {
         if (error) {
             console.error("Error updating order status:", error.message);
             return false;
+        }
+
+        // 2. If it was part of a cluster, check if the cluster is now complete
+        if (order?.cluster_id) {
+            await ClusterService.checkAndCompleteCluster(supabase, order.cluster_id);
         }
 
         return true;
